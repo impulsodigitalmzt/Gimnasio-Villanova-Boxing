@@ -1,11 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { Loader2, X } from 'lucide-react';
 import {
-  GOOGLE_ACCOUNT_OPTIONS,
+  GOOGLE_CLIENT_ID,
+  accountFromGoogleCredential,
+  avatarColorForEmail,
   completeMemberBrowserSession,
   destinationAfterAuth,
+  knownGoogleAccounts,
   memberInitials,
   signInWithGoogleAccount,
   type GoogleAccountOption,
@@ -17,6 +20,61 @@ type GoogleSignInButtonProps = {
   onSuccess?: (href: string) => void;
   onError?: (message: string) => void;
 };
+
+type GoogleIdentityServices = {
+  accounts: {
+    id: {
+      initialize: (config: {
+        client_id: string;
+        callback: (response: { credential?: string }) => void;
+        auto_select?: boolean;
+        cancel_on_tap_outside?: boolean;
+        use_fedcm_for_prompt?: boolean;
+      }) => void;
+      renderButton: (
+        parent: HTMLElement,
+        options: {
+          type?: 'standard' | 'icon';
+          theme?: 'outline' | 'filled_blue' | 'filled_black';
+          size?: 'small' | 'medium' | 'large';
+          text?: 'signin_with' | 'signup_with' | 'continue_with';
+          shape?: 'rectangular' | 'pill';
+          logo_alignment?: 'left' | 'center';
+          width?: number;
+          locale?: string;
+        },
+      ) => void;
+      prompt: () => void;
+    };
+  };
+};
+
+const GSI_SRC = 'https://accounts.google.com/gsi/client';
+
+function loadGoogleScript() {
+  return new Promise<void>((resolve, reject) => {
+    const existing = document.querySelector<HTMLScriptElement>(`script[src="${GSI_SRC}"]`);
+    if (existing) {
+      if (existing.dataset.loaded === 'true') resolve();
+      else {
+        existing.addEventListener('load', () => resolve(), { once: true });
+        existing.addEventListener('error', () => reject(new Error('gsi')), { once: true });
+      }
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = GSI_SRC;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      script.dataset.loaded = 'true';
+      resolve();
+    };
+    script.onerror = () => reject(new Error('gsi'));
+    document.head.appendChild(script);
+  });
+}
 
 function GoogleLogo({ className }: { className?: string }) {
   return (
@@ -48,30 +106,124 @@ export function GoogleSignInButton({
   onError,
 }: GoogleSignInButtonProps) {
   const [open, setOpen] = useState(false);
-  const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [accounts, setAccounts] = useState<GoogleAccountOption[]>([]);
+  const [manual, setManual] = useState(false);
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [gsiReady, setGsiReady] = useState(false);
+  const gsiButtonRef = useRef<HTMLDivElement>(null);
 
-  async function chooseAccount(account: GoogleAccountOption) {
-    setLoadingId(account.id);
-    try {
-      const { user } = signInWithGoogleAccount(account, {
-        planId: planId || undefined,
-      });
-      await completeMemberBrowserSession(user);
-      const href = destinationAfterAuth(user, { planId, next });
-      setOpen(false);
-      onSuccess?.(href);
-    } catch {
-      onError?.('No se pudo continuar con Google. Intenta de nuevo.');
-    } finally {
-      setLoadingId(null);
-    }
+  const finishWithAccount = useCallback(
+    async (account: GoogleAccountOption) => {
+      setBusy(account.id);
+      try {
+        const { user } = signInWithGoogleAccount(account, {
+          planId: planId || undefined,
+        });
+        await completeMemberBrowserSession(user);
+        const href = destinationAfterAuth(user, { planId, next });
+        setOpen(false);
+        onSuccess?.(href);
+      } catch {
+        onError?.('No se pudo continuar con Google. Intenta de nuevo.');
+      } finally {
+        setBusy(null);
+      }
+    },
+    [next, onError, onSuccess, planId],
+  );
+
+  // Google Identity Services real: usa las cuentas activas del navegador.
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) return;
+    let cancelled = false;
+
+    const setup = async () => {
+      try {
+        await loadGoogleScript();
+        if (cancelled) return;
+
+        const google = (window as unknown as { google?: GoogleIdentityServices }).google;
+        if (!google) return;
+
+        google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          use_fedcm_for_prompt: true,
+          cancel_on_tap_outside: true,
+          callback: ({ credential }) => {
+            const account = credential ? accountFromGoogleCredential(credential) : null;
+            if (!account) {
+              onError?.('No se pudo leer tu cuenta de Google. Intenta de nuevo.');
+              return;
+            }
+            void finishWithAccount(account);
+          },
+        });
+
+        if (gsiButtonRef.current) {
+          google.accounts.id.renderButton(gsiButtonRef.current, {
+            type: 'standard',
+            theme: 'outline',
+            size: 'large',
+            text: 'continue_with',
+            shape: 'pill',
+            logo_alignment: 'center',
+            locale: 'es',
+            width: Math.min(gsiButtonRef.current.offsetWidth || 320, 400),
+          });
+        }
+        setGsiReady(true);
+      } catch {
+        setGsiReady(false);
+      }
+    };
+
+    void setup();
+    return () => {
+      cancelled = true;
+    };
+  }, [finishWithAccount, onError]);
+
+  function openChooser() {
+    const known = knownGoogleAccounts();
+    setAccounts(known);
+    setManual(known.length === 0);
+    setEmail('');
+    setName('');
+    setOpen(true);
+  }
+
+  function onManualSubmit(event: FormEvent) {
+    event.preventDefault();
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanName = name.trim() || cleanEmail.split('@')[0];
+    if (!cleanEmail) return;
+
+    void finishWithAccount({
+      id: cleanEmail,
+      name: cleanName,
+      email: cleanEmail,
+      avatarColor: avatarColorForEmail(cleanEmail),
+    });
+  }
+
+  if (GOOGLE_CLIENT_ID) {
+    return (
+      <div className="space-y-2">
+        <div ref={gsiButtonRef} className="flex justify-center [&>div]:!w-full" />
+        {!gsiReady ? (
+          <p className="text-center text-[11px] text-zinc-500">Cargando acceso con Google…</p>
+        ) : null}
+      </div>
+    );
   }
 
   return (
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={openChooser}
         className="flex w-full items-center justify-center gap-3 rounded-2xl border border-white/20 bg-white py-3.5 text-sm font-semibold text-zinc-800 transition hover:bg-zinc-100"
       >
         <GoogleLogo className="size-5" />
@@ -90,16 +242,14 @@ export function GoogleSignInButton({
               <div>
                 <div className="flex items-center gap-2">
                   <GoogleLogo className="size-5" />
-                  <p className="text-sm font-medium text-zinc-500">Iniciar sesión con Google</p>
+                  <p className="text-sm font-medium text-zinc-500">Continuar con Google</p>
                 </div>
-                <h2
-                  id="google-auth-title"
-                  className="mt-3 text-xl font-normal text-zinc-900"
-                >
-                  Elige una cuenta
+                <h2 id="google-auth-title" className="mt-3 text-xl font-normal text-zinc-900">
+                  {manual ? 'Usa tu cuenta' : 'Elige una cuenta'}
                 </h2>
                 <p className="mt-1 text-sm text-zinc-500">
-                  para continuar a <span className="font-medium text-zinc-800">Villanova Boxing</span>
+                  para continuar a{' '}
+                  <span className="font-medium text-zinc-800">Villanova Boxing</span>
                 </p>
               </div>
               <button
@@ -112,48 +262,104 @@ export function GoogleSignInButton({
               </button>
             </div>
 
-            <ul className="divide-y divide-zinc-100">
-              {GOOGLE_ACCOUNT_OPTIONS.map((account) => (
-                <li key={account.id}>
+            {manual ? (
+              <form onSubmit={onManualSubmit} className="px-5 py-5">
+                <label className="block">
+                  <span className="mb-1.5 block text-xs font-semibold text-zinc-600">
+                    Correo de tu cuenta de Google
+                  </span>
+                  <input
+                    type="email"
+                    required
+                    autoFocus
+                    autoComplete="email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="tucuenta@gmail.com"
+                    className="w-full rounded-xl border border-zinc-300 px-4 py-3 text-zinc-900 outline-none focus:border-[#1a73e8]"
+                  />
+                </label>
+                <label className="mt-4 block">
+                  <span className="mb-1.5 block text-xs font-semibold text-zinc-600">
+                    Tu nombre
+                  </span>
+                  <input
+                    type="text"
+                    autoComplete="name"
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                    placeholder="Nombre y apellido"
+                    className="w-full rounded-xl border border-zinc-300 px-4 py-3 text-zinc-900 outline-none focus:border-[#1a73e8]"
+                  />
+                </label>
+
+                <button
+                  type="submit"
+                  disabled={Boolean(busy)}
+                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-[#1a73e8] py-3.5 text-sm font-semibold text-white transition hover:bg-[#1765cc] disabled:opacity-60"
+                >
+                  {busy ? <Loader2 className="size-4 animate-spin" /> : null}
+                  Continuar
+                </button>
+
+                {accounts.length > 0 ? (
                   <button
                     type="button"
-                    disabled={Boolean(loadingId)}
-                    onClick={() => void chooseAccount(account)}
-                    className="flex w-full items-center gap-3 px-5 py-3.5 text-left transition hover:bg-zinc-50 disabled:opacity-60"
+                    onClick={() => setManual(false)}
+                    className="mt-4 text-sm font-medium text-[#1a73e8] hover:underline"
                   >
-                    <span
-                      className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
-                      style={{ backgroundColor: account.avatarColor }}
-                    >
-                      {memberInitials(account.name)}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium text-zinc-900">
-                        {account.name}
-                      </span>
-                      <span className="block truncate text-sm text-zinc-500">{account.email}</span>
-                    </span>
-                    {loadingId === account.id ? (
-                      <Loader2 className="size-4 animate-spin text-zinc-400" />
-                    ) : null}
+                    Ver mis cuentas guardadas
                   </button>
-                </li>
-              ))}
-            </ul>
+                ) : null}
+              </form>
+            ) : (
+              <>
+                <ul className="divide-y divide-zinc-100">
+                  {accounts.map((account) => (
+                    <li key={account.id}>
+                      <button
+                        type="button"
+                        disabled={Boolean(busy)}
+                        onClick={() => void finishWithAccount(account)}
+                        className="flex w-full items-center gap-3 px-5 py-3.5 text-left transition hover:bg-zinc-50 disabled:opacity-60"
+                      >
+                        <span
+                          className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+                          style={{ backgroundColor: account.avatarColor }}
+                        >
+                          {memberInitials(account.name)}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-medium text-zinc-900">
+                            {account.name}
+                          </span>
+                          <span className="block truncate text-sm text-zinc-500">
+                            {account.email}
+                          </span>
+                        </span>
+                        {busy === account.id ? (
+                          <Loader2 className="size-4 animate-spin text-zinc-400" />
+                        ) : null}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
 
-            <div className="border-t border-zinc-100 px-5 py-4">
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="text-sm font-medium text-[#1a73e8] hover:underline"
-              >
-                Usar otra cuenta
-              </button>
-              <p className="mt-3 text-[11px] leading-relaxed text-zinc-400">
-                Al continuar, Villanova Boxing podrá usar tu nombre y correo para crear tu perfil de
-                alumno y mantenerte conectado en este dispositivo.
-              </p>
-            </div>
+                <div className="border-t border-zinc-100 px-5 py-4">
+                  <button
+                    type="button"
+                    onClick={() => setManual(true)}
+                    className="text-sm font-medium text-[#1a73e8] hover:underline"
+                  >
+                    Usar otra cuenta
+                  </button>
+                  <p className="mt-3 text-[11px] leading-relaxed text-zinc-400">
+                    Al continuar, Villanova Boxing podrá usar tu nombre y correo para crear tu
+                    perfil de alumno y mantenerte conectado en este dispositivo.
+                  </p>
+                </div>
+              </>
+            )}
           </div>
         </div>
       ) : null}

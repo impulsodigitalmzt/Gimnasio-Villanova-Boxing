@@ -19,31 +19,75 @@ export type GoogleAccountOption = {
   id: string;
   name: string;
   email: string;
-  /** Iniciales o color de avatar */
+  /** Color del avatar cuando no hay foto de la cuenta. */
   avatarColor: string;
+  /** Foto de perfil de la cuenta de Google, si la entrega el token. */
+  picture?: string;
 };
 
-/** Cuentas de ejemplo estilo selector de Google. */
-export const GOOGLE_ACCOUNT_OPTIONS: GoogleAccountOption[] = [
-  {
-    id: 'g_alex',
-    name: 'Alex Rivera',
-    email: 'alex.rivera@gmail.com',
-    avatarColor: '#4285F4',
-  },
-  {
-    id: 'g_maria',
-    name: 'María López',
-    email: 'maria.lopez.mz@gmail.com',
-    avatarColor: '#EA4335',
-  },
-  {
-    id: 'g_carlos',
-    name: 'Carlos Méndez',
-    email: 'carlos.mendez@gmail.com',
-    avatarColor: '#34A853',
-  },
-];
+/** Client ID de Google Identity Services; sin él se usa el acceso por correo. */
+export const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? '';
+
+const AVATAR_COLORS = ['#4285F4', '#EA4335', '#34A853', '#FBBC05', '#A142F4'];
+
+export function avatarColorForEmail(email: string) {
+  const seed = email
+    .toLowerCase()
+    .split('')
+    .reduce((total, char) => total + char.charCodeAt(0), 0);
+  return AVATAR_COLORS[seed % AVATAR_COLORS.length];
+}
+
+type GoogleIdTokenPayload = {
+  sub?: string;
+  name?: string;
+  given_name?: string;
+  email?: string;
+  picture?: string;
+};
+
+/** Lee el ID token (JWT) que devuelve Google Identity Services. */
+export function accountFromGoogleCredential(credential: string): GoogleAccountOption | null {
+  try {
+    const [, payload] = credential.split('.');
+    if (!payload) return null;
+
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
+    const json = decodeURIComponent(
+      atob(padded)
+        .split('')
+        .map((char) => `%${`00${char.charCodeAt(0).toString(16)}`.slice(-2)}`)
+        .join(''),
+    );
+
+    const data = JSON.parse(json) as GoogleIdTokenPayload;
+    if (!data.email) return null;
+
+    const email = data.email.trim().toLowerCase();
+    return {
+      id: data.sub || email,
+      name: (data.name || data.given_name || email.split('@')[0]).trim(),
+      email,
+      avatarColor: avatarColorForEmail(email),
+      picture: data.picture,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** Cuentas de Google ya usadas en este dispositivo. */
+export function knownGoogleAccounts(): GoogleAccountOption[] {
+  return loadUsers()
+    .filter((user) => user.authProvider === 'google')
+    .map((user) => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      avatarColor: avatarColorForEmail(user.email),
+    }));
+}
 
 function todayLabel() {
   return new Date().toLocaleDateString('es-MX', {
