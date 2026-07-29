@@ -39,7 +39,8 @@ export default function EventosPage() {
         title={'ASÍ FORMAMOS:\n*NUESTROS EVENTOS.*'}
         description="Estas noches no son anuncios de boletos ni carteleras comerciales. Son ejemplos reales de lo que Villanova hace con sus pupilos: darles un escenario para crecer frente a Mazatlán."
         image={oceanFightNight.hero}
-        imagePosition="center 48%"
+        video={oceanFightNight.heroVideo}
+        imagePosition="center"
         primaryHref="#videos"
         primaryLabel="Ver videos reales"
       />
@@ -60,10 +61,10 @@ export default function EventosPage() {
           <SectionHeading
             eyebrow="Videos de eventos especiales"
             title={'LO QUE HACEMOS\n*CON NUESTROS PUPILOS.*'}
-            description="Arena indoor, acción bajo las luces y ring frente al mar. Tres clips reales de lo que Villanova hace con sus pupilos."
+            description="Una selección breve de acción en el ring que transmite la energía de las funciones Villanova."
           />
 
-          <div className="mt-12 flex snap-x gap-4 overflow-x-auto pb-4 sm:grid sm:snap-none sm:grid-cols-3 sm:gap-5 sm:overflow-visible">
+          <div className="mt-12 flex snap-x gap-4 overflow-x-auto pb-4 sm:grid sm:snap-none sm:grid-cols-2 sm:gap-5 sm:overflow-visible">
             {eventVideos.map((item) => (
               <article
                 key={item.src}

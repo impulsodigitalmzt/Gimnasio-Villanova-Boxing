@@ -86,7 +86,7 @@ export function EventMediaGallery() {
       ) : null}
 
       {active === 'videos' ? (
-        <div className="mt-10 grid gap-5 sm:grid-cols-3">
+        <div className="mt-10 grid gap-5 sm:grid-cols-2">
           {eventVideos.map((item) => (
             <article
               key={item.src}

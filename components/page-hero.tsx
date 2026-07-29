@@ -9,6 +9,7 @@ type PageHeroProps = {
   title: string;
   description: string;
   image?: string;
+  video?: string;
   /** Punto focal de la imagen (object-position) para evitar cortar caras. */
   imagePosition?: string;
   primaryHref?: string;
@@ -20,25 +21,41 @@ export function PageHero({
   title,
   description,
   image,
+  video,
   imagePosition = 'center',
   primaryHref = '/app/login',
   primaryLabel = 'Acceso alumnos',
 }: PageHeroProps) {
   return (
     <section className="site-page-hero-offset relative flex min-h-[62svh] items-end overflow-hidden border-b border-white/10 sm:min-h-[70svh]">
-      {image && (
+      {(image || video) && (
         <>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={image}
-            alt=""
-            className="absolute inset-0 size-full object-cover opacity-85"
-            style={{ objectPosition: imagePosition }}
-          />
+          {image ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={image}
+              alt=""
+              className="absolute inset-0 size-full object-cover opacity-85"
+              style={{ objectPosition: imagePosition }}
+            />
+          ) : null}
+          {video ? (
+            <video
+              src={video}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              className="absolute inset-0 size-full object-cover"
+              style={{ objectPosition: imagePosition }}
+              aria-hidden="true"
+            />
+          ) : null}
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/5" />
         </>
       )}
-      {!image && (
+      {!image && !video && (
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(212,175,55,.22),transparent_35%)]" />
       )}
 

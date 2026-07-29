@@ -4,6 +4,9 @@ const eventVideo = (name: string) => `/Eventos/videos/${name}`;
 export const oceanFightNight = {
   name: 'Ocean Fight Night',
   hero: eventPhoto('743996065_1610202344438217_1978835452550022204_n.jpg'),
+  heroVideo: eventVideo(
+    'AQN9Ah9mLrNi8lv18U5DfIOaiKjvaz48mzeOdB0Nyj33cQWxHBVBxR-GaY7l_OUcV499jYjcBSyg-EtlZPBtZsOY5gwfyPt8rR9_sqWiPA.mp4',
+  ),
   nightScene: eventPhoto('702241005_18091330469252708_7369719696191240629_n.jpg'),
   featuredPoster: eventPhoto('695788316_18090962984252708_2553461239787938425_n.jpg'),
   sponsors: eventPhoto('694605192_18090746717252708_6310615972385733572_n.jpg'),
@@ -106,12 +109,5 @@ export const eventVideos = [
     ),
     title: 'Acción bajo las luces',
     copy: 'Rounds reales: técnica, coraje y la esquina Villanova en cada pelea.',
-  },
-  {
-    src: eventVideo(
-      'AQN9Ah9mLrNi8lv18U5DfIOaiKjvaz48mzeOdB0Nyj33cQWxHBVBxR-GaY7l_OUcV499jYjcBSyg-EtlZPBtZsOY5gwfyPt8rR9_sqWiPA.mp4',
-    ),
-    title: 'Ring frente al mar',
-    copy: 'Ocean Fight Night en la playa: locación, luces y adrenalina mazatleca.',
   },
 ] as const;
