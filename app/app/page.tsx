@@ -3,13 +3,15 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-import { LockKeyhole, ShoppingBag, Trophy } from 'lucide-react';
+import { ArrowRight, LockKeyhole, ShoppingBag, Trophy } from 'lucide-react';
 import { AccountStatusCard } from '@/components/portal/account-status';
-import { ClassOfDayCard } from '@/components/portal/class-of-day';
 import { ChallengeCard } from '@/components/portal/challenge-card';
+import { DailyWorkoutCard } from '@/components/portal/daily-workout';
+import { WelcomeProgressCard } from '@/components/portal/welcome-progress';
 import { useMemberPortal } from '@/lib/portal/store';
 import { isMembershipCurrent } from '@/lib/portal/membership-access';
-import { todayClass, todayRoutine } from '@/lib/portal/mock-data';
+import { useTrainingProgress } from '@/lib/portal/training-progress';
+import { getWorkoutForWeekday } from '@/lib/portal/training-data';
 import { subscriptionPlans } from '@/lib/portal/subscription-plans';
 
 function PlanPicker() {
@@ -61,8 +63,8 @@ function LockedPersonalizationCard() {
             Contenido bloqueado
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-            Clases del día, rutinas y tu entrenamiento personalizado se liberan cuando tu membresía
-            esté activa y al corriente. La tienda y otras compras siguen disponibles.
+            Rutina del día, progreso, calendario y beneficios del plan se liberan cuando tu
+            membresía esté activa y al corriente. La tienda y otras compras siguen disponibles.
           </p>
         </div>
       </div>
@@ -74,11 +76,13 @@ function MemberDashboardContent() {
   const searchParams = useSearchParams();
   const showPlanPicker = searchParams.get('accion') === 'elegir-plan';
   const { ready, profile, challenges } = useMemberPortal();
+  const training = useTrainingProgress();
 
   const member = profile;
   const featured = challenges.filter((c) => !c.joined).slice(0, 3);
+  const workout = getWorkoutForWeekday();
 
-  if (!ready) {
+  if (!ready || !training.ready) {
     return <div className="py-20 text-center text-sm text-zinc-500">Cargando tu cuenta…</div>;
   }
 
@@ -99,24 +103,47 @@ function MemberDashboardContent() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--portal-brand-light)]">
-          Hola, {member.name.split(' ')[0]}
-        </p>
-        <h1 className="mt-1 font-display text-3xl font-black uppercase leading-none text-white">
-          Tu panel de <span className="text-[var(--portal-brand)]">alumno</span>
-        </h1>
-      </header>
-
       {needsPlan ? <PlanPicker /> : null}
 
-      <AccountStatusCard profile={member} />
-
       {current ? (
-        <ClassOfDayCard dayClass={todayClass} routine={todayRoutine} />
+        <>
+          <WelcomeProgressCard
+            profile={member}
+            stats={training.stats}
+            level={training.level}
+            onLevelChange={training.setLevel}
+          />
+          <DailyWorkoutCard
+            workout={workout}
+            level={training.level}
+            todayCompleted={training.todayCompleted}
+            onMarkComplete={training.markTodayComplete}
+            compact
+          />
+          <Link
+            href="/app/clases"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-brand/40 py-4 text-xs font-black uppercase tracking-wider text-white hover:bg-brand/10"
+          >
+            Ver rutina completa, calendario y registro
+            <ArrowRight className="size-4" />
+          </Link>
+        </>
       ) : (
-        <LockedPersonalizationCard />
+        <>
+          <header>
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--portal-brand-light)]">
+              Hola, {member.name.split(' ')[0]}
+            </p>
+            <h1 className="mt-1 font-display text-3xl font-black uppercase leading-none text-white">
+              Tu panel de <span className="text-[var(--portal-brand)]">alumno</span>
+            </h1>
+          </header>
+          <AccountStatusCard profile={member} />
+          <LockedPersonalizationCard />
+        </>
       )}
+
+      {current ? <AccountStatusCard profile={member} /> : null}
 
       <section className="overflow-hidden rounded-[1.75rem] border-[3px] border-zinc-500 bg-[var(--portal-card)]">
         <Link href="/app/tienda" className="flex items-center gap-4 p-5 active:bg-white/5">
@@ -136,7 +163,6 @@ function MemberDashboardContent() {
         </Link>
       </section>
 
-      {/* Retos = venta / promo: disponibles aunque la membresía no esté activa */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-white">

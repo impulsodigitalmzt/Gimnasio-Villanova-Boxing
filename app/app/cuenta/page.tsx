@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
 import { LogOut, Save } from 'lucide-react';
 import { AccountStatusCard } from '@/components/portal/account-status';
+import { PlanBenefitsCard } from '@/components/portal/plan-benefits';
 import { useMemberPortal } from '@/lib/portal/store';
+import { isMembershipCurrent } from '@/lib/portal/membership-access';
 import { membershipRenewalPrice } from '@/lib/portal/mock-data';
 import { buildMembershipPayUrl } from '@/lib/portal/payments';
 import { clearMemberSession, persistMemberSession } from '@/lib/portal/auth-session';
@@ -95,6 +97,8 @@ export default function MemberAccountPage() {
       </header>
 
       <AccountStatusCard profile={profile} />
+
+      {isMembershipCurrent(profile) ? <PlanBenefitsCard profile={profile} /> : null}
 
       <form
         onSubmit={saveProfile}
