@@ -3,11 +3,12 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-import { ShoppingBag, Trophy } from 'lucide-react';
+import { LockKeyhole, ShoppingBag, Trophy } from 'lucide-react';
 import { AccountStatusCard } from '@/components/portal/account-status';
 import { ClassOfDayCard } from '@/components/portal/class-of-day';
 import { ChallengeCard } from '@/components/portal/challenge-card';
 import { useMemberPortal } from '@/lib/portal/store';
+import { isMembershipCurrent } from '@/lib/portal/membership-access';
 import { todayClass, todayRoutine } from '@/lib/portal/mock-data';
 import { subscriptionPlans } from '@/lib/portal/subscription-plans';
 
@@ -21,7 +22,8 @@ function PlanPicker() {
         Activa tu membresía
       </h2>
       <p className="mt-2 text-sm text-zinc-400">
-        Ya tienes cuenta. Selecciona un plan y confirma el pago para entrenar.
+        Ya tienes cuenta. Selecciona un plan y confirma el pago para desbloquear tu entrenamiento
+        personalizado.
       </p>
       <div className="mt-4 space-y-2">
         {subscriptionPlans.map((plan) => (
@@ -39,6 +41,30 @@ function PlanPicker() {
             </span>
           </Link>
         ))}
+      </div>
+    </section>
+  );
+}
+
+function LockedPersonalizationCard() {
+  return (
+    <section className="overflow-hidden rounded-[1.75rem] border-[3px] border-white/15 bg-[var(--portal-card)] p-5">
+      <div className="flex items-start gap-3">
+        <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-white/5 text-zinc-400">
+          <LockKeyhole className="size-5" />
+        </span>
+        <div>
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+            Personalización
+          </p>
+          <h2 className="mt-1 font-display text-xl font-black uppercase text-white">
+            Contenido bloqueado
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+            Clases del día, rutinas y tu entrenamiento personalizado se liberan cuando tu membresía
+            esté activa y al corriente. La tienda y otras compras siguen disponibles.
+          </p>
+        </div>
       </div>
     </section>
   );
@@ -67,6 +93,7 @@ function MemberDashboardContent() {
     );
   }
 
+  const current = isMembershipCurrent(member);
   const needsPlan =
     showPlanPicker || member.status === 'pendiente' || member.expiresAt === 'Pendiente de pago';
 
@@ -84,7 +111,12 @@ function MemberDashboardContent() {
       {needsPlan ? <PlanPicker /> : null}
 
       <AccountStatusCard profile={member} />
-      <ClassOfDayCard dayClass={todayClass} routine={todayRoutine} />
+
+      {current ? (
+        <ClassOfDayCard dayClass={todayClass} routine={todayRoutine} />
+      ) : (
+        <LockedPersonalizationCard />
+      )}
 
       <section className="overflow-hidden rounded-[1.75rem] border-[3px] border-zinc-500 bg-[var(--portal-card)]">
         <Link href="/app/tienda" className="flex items-center gap-4 p-5 active:bg-white/5">
@@ -104,6 +136,7 @@ function MemberDashboardContent() {
         </Link>
       </section>
 
+      {/* Retos = venta / promo: disponibles aunque la membresía no esté activa */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-white">

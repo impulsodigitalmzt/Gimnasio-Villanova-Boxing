@@ -5,10 +5,13 @@ import { usePathname } from 'next/navigation';
 import {
   Dumbbell,
   Home,
+  LockKeyhole,
   ShoppingBag,
   Trophy,
   UserRound,
 } from 'lucide-react';
+import { isMembershipCurrent } from '@/lib/portal/membership-access';
+import { useMemberPortal } from '@/lib/portal/store';
 
 /** Opciones de la barra principal del Portal (página Inicio y resto de /app). */
 export const portalNavTabs = [
@@ -21,6 +24,8 @@ export const portalNavTabs = [
 
 export function PortalBottomNav() {
   const pathname = usePathname();
+  const { ready, profile } = useMemberPortal();
+  const current = ready && isMembershipCurrent(profile);
 
   return (
     <nav
@@ -33,12 +38,17 @@ export function PortalBottomNav() {
             tab.href === '/app' ? pathname === '/app' : pathname.startsWith(tab.href);
           const Icon = tab.icon;
           const isShop = tab.href === '/app/tienda';
+          const locked = tab.href === '/app/clases' && !current;
           return (
             <Link
               key={tab.href}
               href={tab.href}
               className={`flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-2xl px-1 py-1.5 text-[9px] font-bold uppercase tracking-wider transition ${
-                active ? 'text-[var(--portal-brand-light)]' : 'text-zinc-500'
+                active
+                  ? 'text-[var(--portal-brand-light)]'
+                  : locked
+                    ? 'text-zinc-600'
+                    : 'text-zinc-500'
               }`}
             >
               <span
@@ -47,10 +57,12 @@ export function PortalBottomNav() {
                     ? 'bg-[var(--portal-brand)] text-white'
                     : isShop
                       ? 'bg-[var(--portal-brand)]/20 text-[var(--portal-brand-light)]'
-                      : 'bg-white/5'
+                      : locked
+                        ? 'bg-white/5 text-zinc-600'
+                        : 'bg-white/5'
                 }`}
               >
-                <Icon className="size-4" />
+                {locked ? <LockKeyhole className="size-4" /> : <Icon className="size-4" />}
               </span>
               {tab.label}
             </Link>
