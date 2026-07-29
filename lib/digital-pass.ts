@@ -7,6 +7,8 @@ export type DigitalPass = {
   planId: string;
   plan: string;
   memberId: string;
+  /** Id del usuario portal (para check-in CRM). */
+  portalUserId?: string;
   joinDate: string;
   expiresAt: string;
   orderId?: string;
@@ -49,6 +51,7 @@ export function createDigitalPass(input: {
   planId: string;
   orderId?: string;
   memberId?: string;
+  portalUserId?: string;
 }): DigitalPass {
   return {
     name: input.name.trim(),
@@ -57,6 +60,7 @@ export function createDigitalPass(input: {
     planId: input.planId,
     plan: planLabels[input.planId] ?? 'Membresía Villanova',
     memberId: input.memberId ?? `VNB-${Math.floor(100000 + Math.random() * 900000)}`,
+    portalUserId: input.portalUserId,
     joinDate: formatJoinDate(),
     expiresAt: computePassExpiry(input.planId),
     orderId: input.orderId,

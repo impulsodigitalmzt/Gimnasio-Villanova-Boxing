@@ -9,6 +9,7 @@ import {
   Home,
   LogOut,
   Package,
+  QrCode,
   Users,
 } from 'lucide-react';
 import { adminUser } from '@/lib/admin/types';
@@ -18,6 +19,7 @@ import { gymHours } from '@/lib/site-data';
 const nav = [
   { href: '/admin', label: 'Inicio', icon: Home, hint: 'Resumen del día' },
   { href: '/admin/socios', label: 'Socios', icon: Users, hint: 'Planes Individual · Dúo · Grupal' },
+  { href: '/admin/asistencia', label: 'Asistencia', icon: QrCode, hint: 'Check-in QR recepción' },
   { href: '/admin/agenda', label: 'Clases', icon: CalendarDays, hint: 'Boxeo por nivel y edad' },
   { href: '/admin/rutinas', label: 'Rutinas', icon: ClipboardList, hint: 'Sombra · costal · mitts' },
   { href: '/admin/productos', label: 'Tienda', icon: Package, hint: 'Guantes, protectores y merch' },

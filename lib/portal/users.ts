@@ -60,6 +60,11 @@ export type PortalUser = {
   streakDays?: number;
   completedSessionsCount?: number;
   trainingUpdatedAt?: string;
+  /** Asistencia física (check-in QR en recepción). */
+  lastCheckInAt?: string;
+  checkInsThisMonth?: number;
+  daysSinceLastVisit?: number;
+  attendanceRisk?: 'ok' | 'baja' | 'en_riesgo' | 'sin_registro';
 };
 
 /**

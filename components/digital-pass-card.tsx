@@ -1,7 +1,11 @@
-import { QrCode } from 'lucide-react';
+'use client';
+
+import { MemberCheckInQr } from '@/components/attendance/member-checkin-qr';
 import type { DigitalPass } from '@/lib/digital-pass';
 
 export function DigitalPassCard({ pass }: { pass: DigitalPass }) {
+  const qrMemberId = pass.portalUserId || pass.memberId;
+
   return (
     <div className="relative mx-auto w-full max-w-xl overflow-hidden rounded-[1.5rem] border-[3px] border-zinc-500 bg-[radial-gradient(circle_at_90%_10%,rgba(212,175,55,.45),transparent_35%),linear-gradient(135deg,#171717,#050505)] p-5 shadow-2xl shadow-brand/15 sm:rounded-[2rem] sm:p-8">
       <div className="flex items-start justify-between gap-3">
@@ -17,7 +21,13 @@ export function DigitalPassCard({ pass }: { pass: DigitalPass }) {
             </p>
           </div>
         </div>
-        <QrCode className="size-9 shrink-0 text-white sm:size-12" aria-hidden />
+        <MemberCheckInQr
+          memberId={qrMemberId}
+          email={pass.email}
+          size={88}
+          showId={false}
+          className="!rounded-xl !p-1.5 shadow-none sm:!p-2"
+        />
       </div>
 
       <div className="mt-8 sm:mt-12">
@@ -31,6 +41,9 @@ export function DigitalPassCard({ pass }: { pass: DigitalPass }) {
           <span className="break-all">{pass.memberId}</span>
           <span className="text-brand-light">VENCE {pass.expiresAt}</span>
         </div>
+        <p className="mt-3 text-[10px] text-zinc-500">
+          Muestra este QR en recepción para registrar tu asistencia
+        </p>
       </div>
     </div>
   );

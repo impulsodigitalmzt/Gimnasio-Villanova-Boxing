@@ -2,6 +2,8 @@ export type MemberStatus = 'activo' | 'por_vencer' | 'vencido' | 'pendiente';
 
 export type MemberTrainingLevel = 'principiante' | 'intermedio' | 'avanzado';
 
+export type MemberAttendanceRisk = 'ok' | 'baja' | 'en_riesgo' | 'sin_registro';
+
 export type Member = {
   id: string;
   name: string;
@@ -26,6 +28,11 @@ export type Member = {
   streakDays?: number;
   completedSessionsCount?: number;
   trainingUpdatedAt?: string;
+  /** Asistencia física (check-in QR). */
+  lastCheckInAt?: string;
+  checkInsThisMonth?: number;
+  daysSinceLastVisit?: number;
+  attendanceRisk?: MemberAttendanceRisk;
 };
 
 export type TodayPackage = {

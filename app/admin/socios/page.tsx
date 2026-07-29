@@ -12,6 +12,8 @@ import {
   markAutomationSent,
   type CrmAutomation,
 } from '@/lib/portal/automations';
+import { refreshAttendanceRiskInCrm } from '@/lib/attendance/service';
+import { attendanceRiskLabel } from '@/lib/attendance/risk';
 
 export default function SociosPage() {
   const { db, busy, toast, run, stats } = useAdminDb();
@@ -19,13 +21,16 @@ export default function SociosPage() {
   const [automations, setAutomations] = useState<CrmAutomation[]>([]);
 
   useEffect(() => {
+    refreshAttendanceRiskInCrm();
     const sync = () => setAutomations(loadAutomations());
     sync();
     window.addEventListener('villanova-crm-automations-updated', sync);
     window.addEventListener('villanova-portal-users-updated', sync);
+    window.addEventListener('villanova-admin-db-updated', sync);
     return () => {
       window.removeEventListener('villanova-crm-automations-updated', sync);
       window.removeEventListener('villanova-portal-users-updated', sync);
+      window.removeEventListener('villanova-admin-db-updated', sync);
     };
   }, []);
 
@@ -39,9 +44,17 @@ export default function SociosPage() {
         m.plan.toLowerCase().includes(q) ||
         (m.phone ?? '').toLowerCase().includes(q) ||
         (m.primaryClassName ?? '').toLowerCase().includes(q) ||
-        (m.challengeTitles ?? []).some((t) => t.toLowerCase().includes(q)),
+        (m.lastWorkoutTitle ?? '').toLowerCase().includes(q) ||
+        (m.challengeTitles ?? []).some((t) => t.toLowerCase().includes(q)) ||
+        attendanceRiskLabel(m.attendanceRisk || 'sin_registro')
+          .toLowerCase()
+          .includes(q),
     );
   }, [db.members, query]);
+
+  const atRiskCount = db.members.filter(
+    (m) => m.attendanceRisk === 'baja' || m.attendanceRisk === 'en_riesgo',
+  ).length;
 
   const pendingAutomations = useMemo(
     () => automations.filter((a) => a.status === 'queued' || a.status === 'scheduled'),
@@ -54,11 +67,17 @@ export default function SociosPage() {
     return 'activo';
   }
 
+  function automationLabel(kind: CrmAutomation['kind']) {
+    if (kind === 'welcome') return 'Bienvenida';
+    if (kind === 'expiry_reminder') return 'Renovación';
+    return 'Inasistencia';
+  }
+
   return (
     <div>
       <PageHeader
         title="Socios"
-        subtitle="Prospecto → pago → alumno activo · seguimiento de plan, retos y rutina de box"
+        subtitle="Prospecto → pago → alumno activo · plan, retos, rutina y asistencia QR"
       />
 
       <div className="space-y-6 p-5 sm:p-8">
@@ -67,12 +86,12 @@ export default function SociosPage() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar por nombre, plan, clase, reto o WhatsApp..."
+            placeholder="Buscar por nombre, plan, clase, reto, asistencia o WhatsApp..."
             className="w-full rounded-xl border border-zinc-200 bg-white py-3.5 pl-11 pr-4 text-sm text-zinc-700 outline-none focus:border-[var(--admin-brand)]"
           />
         </label>
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
           <ColoredStatCard label="Activos" value={stats.members.active} headerClass="bg-[var(--admin-brand)]" />
           <ColoredStatCard
             label="Por vencer (≤3 días)"
@@ -80,7 +99,16 @@ export default function SociosPage() {
             headerClass="bg-amber-500"
           />
           <ColoredStatCard label="Vencidos" value={stats.members.overdue} headerClass="bg-zinc-800" />
-          <ColoredStatCard label="Pendientes de pago" value={stats.members.pending} headerClass="bg-[var(--admin-brand-dark)]" />
+          <ColoredStatCard
+            label="Pendientes de pago"
+            value={stats.members.pending}
+            headerClass="bg-[var(--admin-brand-dark)]"
+          />
+          <ColoredStatCard
+            label="Baja asistencia / riesgo"
+            value={atRiskCount}
+            headerClass="bg-rose-600"
+          />
         </div>
 
         <section className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
@@ -88,7 +116,7 @@ export default function SociosPage() {
             <div>
               <h2 className="text-sm font-bold text-zinc-800">Seguimiento automático</h2>
               <p className="text-xs text-zinc-500">
-                Bienvenida al activar · recordatorio 3 días antes del vencimiento
+                Bienvenida · renovación (3 días) · inasistencia (7 / 14 días sin check-in)
               </p>
             </div>
             <span className="rounded-full bg-amber-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-700">
@@ -98,24 +126,19 @@ export default function SociosPage() {
           <div className="divide-y divide-zinc-100">
             {pendingAutomations.length === 0 ? (
               <p className="px-5 py-8 text-center text-sm text-zinc-400">
-                No hay avisos en cola. Se generan al confirmar un pago o cuando un socio entra en
-                ventana de vencimiento.
+                No hay avisos en cola. Se generan al pagar, al acercarse el vencimiento o si un
+                alumno deja de asistir.
               </p>
             ) : (
               pendingAutomations.slice(0, 8).map((item) => (
-                <article key={item.id} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-start sm:justify-between">
+                <article
+                  key={item.id}
+                  className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-start sm:justify-between"
+                >
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-600">
-                        {item.kind === 'welcome' ? (
-                          <>
-                            <BellRing className="size-3" /> Bienvenida
-                          </>
-                        ) : (
-                          <>
-                            <BellRing className="size-3" /> Renovación
-                          </>
-                        )}
+                        <BellRing className="size-3" /> {automationLabel(item.kind)}
                       </span>
                       <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
                         {item.channel === 'whatsapp' ? (
@@ -155,11 +178,11 @@ export default function SociosPage() {
           <header className="border-b border-zinc-100 px-5 py-4">
             <h2 className="text-sm font-bold text-zinc-800">Listado de socios</h2>
             <p className="text-xs text-zinc-500">
-              Seguimiento por plan, retos adquiridos, clase de box y progreso de entrenamiento
+              Plan, retos, rutina de box, asistencia física y progreso
             </p>
           </header>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1100px] text-left text-sm">
+            <table className="w-full min-w-[1280px] text-left text-sm">
               <thead className="bg-zinc-50 text-xs uppercase text-zinc-500">
                 <tr>
                   <th className="px-5 py-3 font-semibold">Nombre</th>
@@ -167,6 +190,7 @@ export default function SociosPage() {
                   <th className="px-5 py-3 font-semibold">Plan</th>
                   <th className="px-5 py-3 font-semibold">Entrenamiento</th>
                   <th className="px-5 py-3 font-semibold">Retos</th>
+                  <th className="px-5 py-3 font-semibold">Asistencia</th>
                   <th className="px-5 py-3 font-semibold">Progreso</th>
                   <th className="px-5 py-3 font-semibold">Vence</th>
                   <th className="px-5 py-3 font-semibold">Estado</th>
@@ -233,6 +257,32 @@ export default function SociosPage() {
                       ) : (
                         <span className="text-zinc-400">—</span>
                       )}
+                    </td>
+                    <td className="px-5 py-3.5 text-zinc-600">
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                          member.attendanceRisk === 'en_riesgo'
+                            ? 'bg-rose-100 text-rose-700'
+                            : member.attendanceRisk === 'baja'
+                              ? 'bg-amber-100 text-amber-700'
+                              : member.attendanceRisk === 'ok'
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-zinc-100 text-zinc-600'
+                        }`}
+                      >
+                        {attendanceRiskLabel(member.attendanceRisk || 'sin_registro')}
+                      </span>
+                      <span className="mt-1 block text-xs text-zinc-400">
+                        {member.lastCheckInAt
+                          ? `Última ${new Date(member.lastCheckInAt).toLocaleDateString('es-MX')}`
+                          : 'Sin check-in'}
+                      </span>
+                      <span className="mt-0.5 block text-xs text-zinc-400">
+                        Mes: {member.checkInsThisMonth ?? 0}
+                        {typeof member.daysSinceLastVisit === 'number'
+                          ? ` · ${member.daysSinceLastVisit}d`
+                          : ''}
+                      </span>
                     </td>
                     <td className="px-5 py-3.5 text-zinc-600">
                       <span className="block text-xs">

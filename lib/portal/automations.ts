@@ -5,7 +5,7 @@
  */
 
 export type AutomationChannel = 'whatsapp' | 'email';
-export type AutomationKind = 'welcome' | 'expiry_reminder';
+export type AutomationKind = 'welcome' | 'expiry_reminder' | 'inactivity_nudge';
 export type AutomationStatus = 'queued' | 'scheduled' | 'sent';
 
 export type CrmAutomation = {
@@ -21,6 +21,8 @@ export type CrmAutomation = {
   scheduledFor: string;
   /** Vencimiento de membresía (etiqueta DD/MM/AAAA) si aplica */
   membershipExpiresAt?: string;
+  /** Días sin asistencia (nudge de retención). */
+  daysAbsent?: number;
   message: string;
   createdAt: string;
 };
@@ -160,6 +162,71 @@ export function scheduleExpiryReminder(input: {
       a.memberId === input.memberId &&
       a.membershipExpiresAt === input.expiresAt,
   );
+}
+
+export function buildInactivityMessage(name: string, daysAbsent: number) {
+  if (daysAbsent >= 14) {
+    return (
+      `Hola ${name}, te extrañamos en Villanova Boxing. ` +
+      `Llevas ${daysAbsent} días sin venir y no queremos que pierdas el ritmo. ` +
+      `¿Te agendamos una clase esta semana? Responde este WhatsApp y te esperamos en el ring.`
+    );
+  }
+  return (
+    `Hola ${name}, notamos que llevas ${daysAbsent} días sin asistir a Villanova. ` +
+    `Tu lugar sigue reservado: ¿vienes hoy o mañana? Estamos para apoyarte.`
+  );
+}
+
+/**
+ * Mensaje automático por baja asistencia / riesgo de abandono.
+ * Demo: queda en cola del CRM (sin WhatsApp real hasta conectar API).
+ */
+export function queueInactivityNudge(input: {
+  memberId: string;
+  memberName: string;
+  memberEmail: string;
+  phone?: string;
+  daysAbsent: number;
+  risk: 'baja' | 'en_riesgo';
+}) {
+  const now = new Date().toISOString();
+  const message = buildInactivityMessage(input.memberName, input.daysAbsent);
+  const bucket = input.risk === 'en_riesgo' ? '14d' : '7d';
+
+  upsertAutomation(
+    {
+      id: `auto_inactive_${input.memberId}_${bucket}`,
+      kind: 'inactivity_nudge',
+      memberId: input.memberId,
+      memberName: input.memberName,
+      memberEmail: input.memberEmail,
+      phone: input.phone,
+      channel: input.phone ? 'whatsapp' : 'email',
+      status: 'queued',
+      scheduledFor: now,
+      daysAbsent: input.daysAbsent,
+      message,
+      createdAt: now,
+    },
+    (a) =>
+      a.kind === 'inactivity_nudge' &&
+      a.memberId === input.memberId &&
+      a.id.endsWith(`_${bucket}`) &&
+      a.status !== 'sent',
+  );
+}
+
+export function clearInactivityNudges(memberId: string) {
+  const list = loadAutomations().filter(
+    (a) =>
+      !(
+        a.kind === 'inactivity_nudge' &&
+        a.memberId === memberId &&
+        (a.status === 'queued' || a.status === 'scheduled')
+      ),
+  );
+  saveAutomations(list);
 }
 
 /** Marca como enviada (demo) una automatización. */

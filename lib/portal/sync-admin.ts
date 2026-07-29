@@ -46,6 +46,10 @@ export function portalUserToAdminMember(user: PortalUser): Member {
     streakDays: user.streakDays,
     completedSessionsCount: user.completedSessionsCount,
     trainingUpdatedAt: user.trainingUpdatedAt,
+    lastCheckInAt: user.lastCheckInAt,
+    checkInsThisMonth: user.checkInsThisMonth,
+    daysSinceLastVisit: user.daysSinceLastVisit,
+    attendanceRisk: user.attendanceRisk,
   };
 }
 

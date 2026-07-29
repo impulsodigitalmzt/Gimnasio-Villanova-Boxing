@@ -115,7 +115,7 @@ export function ColoredStatCard({
   headerClass,
 }: {
   label: string;
-  value: number;
+  value: number | string;
   headerClass: string;
 }) {
   return (

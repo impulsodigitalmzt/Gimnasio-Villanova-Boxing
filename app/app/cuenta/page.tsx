@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { LogOut, Save } from 'lucide-react';
 import { AccountStatusCard } from '@/components/portal/account-status';
 import { PlanBenefitsCard } from '@/components/portal/plan-benefits';
+import { MemberCheckInQr } from '@/components/attendance/member-checkin-qr';
 import { useMemberPortal } from '@/lib/portal/store';
 import { isMembershipCurrent } from '@/lib/portal/membership-access';
 import { membershipRenewalPrice } from '@/lib/portal/mock-data';
@@ -16,6 +17,11 @@ import {
   daysUntilExpiry,
   EXPIRY_REMINDER_DAYS,
 } from '@/lib/portal/membership-lifecycle';
+import {
+  createDigitalPass,
+  loadDigitalPass,
+  saveDigitalPass,
+} from '@/lib/digital-pass';
 
 export default function MemberAccountPage() {
   const { ready, profile, persistProfile } = useMemberPortal();
@@ -97,6 +103,43 @@ export default function MemberAccountPage() {
       </header>
 
       <AccountStatusCard profile={profile} />
+
+      <section className="rounded-[1.75rem] border-[3px] border-zinc-500 bg-[var(--portal-card)] p-5">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--portal-brand-light)]">
+          Pase de asistencia
+        </p>
+        <h2 className="mt-2 font-display text-xl font-black uppercase text-white">
+          Tu QR de entrada
+        </h2>
+        <p className="mt-2 text-sm text-zinc-400">
+          Muéstralo en recepción. El teléfono del gym lo escanea y queda registrado en el CRM.
+        </p>
+        <div className="mt-5 flex justify-center">
+          <MemberCheckInQr memberId={profile.id} email={profile.email} size={200} />
+        </div>
+        <button
+          type="button"
+          className="mt-5 w-full rounded-2xl border border-white/15 py-3 text-[10px] font-black uppercase tracking-wider text-zinc-300 hover:border-brand hover:text-white"
+          onClick={() => {
+            const existing = loadDigitalPass();
+            const next = createDigitalPass({
+              name: profile.name,
+              email: profile.email,
+              phone: profile.phone,
+              planId: profile.planId,
+              memberId: existing?.memberId,
+              portalUserId: profile.id,
+            });
+            // Mantener vigencia del portal si está activa
+            if (profile.expiresAt && profile.expiresAt !== 'Pendiente de pago') {
+              next.expiresAt = profile.expiresAt;
+            }
+            saveDigitalPass(next);
+          }}
+        >
+          Guardar también en pase digital
+        </button>
+      </section>
 
       {isMembershipCurrent(profile) ? <PlanBenefitsCard profile={profile} /> : null}
 
