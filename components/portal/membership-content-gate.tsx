@@ -76,6 +76,7 @@ export function MembershipContentGate({ children }: { children: React.ReactNode 
                 }).finally(() => {
                   setConfirming(false);
                   checkIn.refresh();
+                  window.location.assign('/app/clases');
                 });
               }}
             >

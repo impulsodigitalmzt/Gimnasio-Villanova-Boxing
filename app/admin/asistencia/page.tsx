@@ -30,10 +30,13 @@ import {
   playCheckInAlarm,
   speakCheckInName,
 } from '@/lib/attendance/checkin-feedback';
+import { todayClass } from '@/lib/portal/mock-data';
 
 type DetectBanner = {
   name: string;
   subtitle: string;
+  className?: string;
+  classTime?: string;
   kind: 'success' | 'duplicate' | 'error';
 };
 
@@ -66,7 +69,8 @@ export default function AsistenciaPage() {
 
   useEffect(() => {
     if (!banner) return;
-    const t = window.setTimeout(() => setBanner(null), 3200);
+    const ms = banner.kind === 'error' ? 2800 : 5200;
+    const t = window.setTimeout(() => setBanner(null), ms);
     return () => window.clearTimeout(t);
   }, [banner]);
 
@@ -103,7 +107,13 @@ export default function AsistenciaPage() {
     subtitle: string,
     kind: DetectBanner['kind'],
   ) {
-    setBanner({ name, subtitle, kind });
+    setBanner({
+      name,
+      subtitle,
+      kind,
+      className: kind === 'error' ? undefined : todayClass.name,
+      classTime: kind === 'error' ? undefined : todayClass.time,
+    });
     playCheckInAlarm(kind);
     if (kind === 'success' || kind === 'duplicate') {
       speakCheckInName(name);
@@ -139,7 +149,8 @@ export default function AsistenciaPage() {
       }
     } finally {
       setBusy(false);
-      window.setTimeout(() => setPaused(false), 1400);
+      // Pausa más larga: evita reintentos mientras se muestra el panel de clase
+      window.setTimeout(() => setPaused(false), 5200);
     }
   }
 
@@ -236,19 +247,32 @@ export default function AsistenciaPage() {
           }`}
           role="alert"
         >
-          <div className="text-center text-white">
+          <div className="max-w-lg text-center text-white">
             <CheckCircle2 className="mx-auto size-16" />
             <p className="mt-4 font-mono text-xs font-bold uppercase tracking-[0.25em] opacity-90">
               {banner.kind === 'success'
-                ? 'Detectado'
+                ? 'Entrada detectada'
                 : banner.kind === 'duplicate'
-                  ? 'Ya registrado'
+                  ? 'Ya registrado hoy'
                   : 'Atención'}
             </p>
             <h2 className="mt-3 font-display text-4xl font-black uppercase leading-tight sm:text-6xl">
               {banner.name}
             </h2>
             <p className="mt-4 text-lg font-semibold sm:text-xl">{banner.subtitle}</p>
+            {banner.className ? (
+              <div className="mt-8 rounded-2xl border border-white/30 bg-black/20 px-5 py-4 text-left">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/80">
+                  Clase de hoy
+                </p>
+                <p className="mt-1 font-display text-2xl font-black uppercase sm:text-3xl">
+                  {banner.className}
+                </p>
+                <p className="mt-1 text-sm text-white/90">
+                  {banner.classTime} · El alumno ya puede ver su rutina en el portal
+                </p>
+              </div>
+            ) : null}
           </div>
         </div>
       ) : null}

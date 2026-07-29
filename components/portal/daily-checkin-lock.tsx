@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { QrCode } from 'lucide-react';
 import { confirmTodayCheckInFromPortal } from '@/lib/portal/daily-checkin';
 import { useState } from 'react';
@@ -15,6 +16,7 @@ export function DailyCheckInLockCard({
   email: string;
   onConfirmed?: () => void;
 }) {
+  const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const demoMode = !process.env.NEXT_PUBLIC_ATTENDANCE_API_URL?.trim();
 
@@ -32,8 +34,8 @@ export function DailyCheckInLockCard({
             Regístrate para desbloquear
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-            Tu plan está al corriente. La rutina, el progreso y las clases de hoy se liberan
-            cuando recepción escanea tu QR.
+            Tu plan está al corriente. Al registrar tu QR en recepción, este panel se cambia solo
+            por tu clase y rutina del día.
           </p>
           <Link
             href="/app/qr"
@@ -48,10 +50,12 @@ export function DailyCheckInLockCard({
               className="mt-2 w-full rounded-2xl border border-white/15 py-3 text-[10px] font-black uppercase tracking-wider text-zinc-400 hover:border-brand hover:text-white disabled:opacity-50"
               onClick={() => {
                 setConfirming(true);
-                void confirmTodayCheckInFromPortal({ memberId, email }).finally(() => {
-                  setConfirming(false);
-                  onConfirmed?.();
-                });
+                void confirmTodayCheckInFromPortal({ memberId, email })
+                  .then((ok) => {
+                    onConfirmed?.();
+                    if (ok) router.replace('/app/clases');
+                  })
+                  .finally(() => setConfirming(false));
               }}
             >
               {confirming ? 'Confirmando…' : 'Ya me escanearon (demo)'}
