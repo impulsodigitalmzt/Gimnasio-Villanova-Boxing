@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu } from 'lucide-react';
+import { Menu, UserRound } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { BrandLogo } from './brand-logo';
 import { MobileNavMenu } from './mobile-nav-menu';
@@ -112,16 +112,27 @@ export function SiteHeader({ cartSlot }: { cartSlot?: ReactNode }) {
                 </span>
               </Link>
             ) : (
-              <Link
-                href="/app/login"
-                className="hidden max-w-[11rem] rounded-full border border-brand/50 bg-brand/10 px-3 py-2 text-brand-light transition-colors hover:border-brand hover:bg-brand/20 xl:max-w-none xl:px-4 xl:py-2.5 lg:inline-flex"
-                aria-label="Iniciar sesión / Acceso alumnos"
-              >
-                <span className="block text-center text-[10px] font-black uppercase leading-tight tracking-wider xl:text-[11px]">
-                  <span className="xl:hidden">Acceso Alumnos</span>
-                  <span className="hidden xl:inline">Iniciar Sesión / Acceso Alumnos</span>
-                </span>
-              </Link>
+              <>
+                <Link
+                  href="/app/login"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-full border border-brand/60 bg-brand/10 px-2.5 text-brand-light transition-colors hover:border-brand hover:bg-brand/20 lg:hidden"
+                  aria-label="Iniciar sesión / Acceso alumnos"
+                >
+                  <UserRound className="size-3.5 shrink-0" />
+                  <span className="hidden text-[9px] font-black uppercase tracking-wider min-[360px]:inline">
+                    Ingresar
+                  </span>
+                </Link>
+                <Link
+                  href="/app/login"
+                  className="hidden max-w-[11rem] rounded-full border border-brand/50 bg-brand/10 px-3 py-2 text-brand-light transition-colors hover:border-brand hover:bg-brand/20 xl:max-w-none xl:px-4 xl:py-2.5 lg:inline-flex"
+                  aria-label="Iniciar sesión / Acceso alumnos"
+                >
+                  <span className="block text-center text-[10px] font-black uppercase leading-tight tracking-wider xl:text-[11px]">
+                    Iniciar sesión
+                  </span>
+                </Link>
+              </>
             )}
 
             <button
