@@ -7,14 +7,14 @@ import { ProgressLogSection } from '@/components/portal/progress-log';
 import { TrainingCalendar } from '@/components/portal/training-calendar';
 import { useMemberPortal } from '@/lib/portal/store';
 import { useTrainingProgress } from '@/lib/portal/training-progress';
-import { getWorkoutForWeekday } from '@/lib/portal/training-data';
+import { resolveMemberWorkout } from '@/lib/portal/training-data';
 import { todayClass } from '@/lib/portal/mock-data';
 import { Clock3 } from 'lucide-react';
 
 function ClassesContent() {
-  const { profile } = useMemberPortal();
+  const { profile, challenges } = useMemberPortal();
   const training = useTrainingProgress();
-  const workout = getWorkoutForWeekday();
+  const workout = resolveMemberWorkout({ dayClass: todayClass, challenges });
   const planName = profile?.planName || 'tu plan';
 
   if (!training.ready) {
@@ -31,8 +31,11 @@ function ClassesContent() {
           Tu entrenamiento
         </h1>
         <p className="mt-2 text-sm text-zinc-400">
-          Contenido personalizado de <span className="text-white">{planName}</span>: rutina del día,
-          ayudas técnicas, registro y calendario.
+          Contenido según tu clase de box de hoy
+          {workout.activeChallenges.length > 0
+            ? ` y tus retos activos (${workout.activeChallenges.join(', ')})`
+            : ''}
+          . Plan <span className="text-white">{planName}</span>.
         </p>
       </header>
 

@@ -11,7 +11,8 @@ import { WelcomeProgressCard } from '@/components/portal/welcome-progress';
 import { useMemberPortal } from '@/lib/portal/store';
 import { isMembershipCurrent } from '@/lib/portal/membership-access';
 import { useTrainingProgress } from '@/lib/portal/training-progress';
-import { getWorkoutForWeekday } from '@/lib/portal/training-data';
+import { resolveMemberWorkout } from '@/lib/portal/training-data';
+import { todayClass } from '@/lib/portal/mock-data';
 import { subscriptionPlans } from '@/lib/portal/subscription-plans';
 
 function PlanPicker() {
@@ -80,7 +81,7 @@ function MemberDashboardContent() {
 
   const member = profile;
   const featured = challenges.filter((c) => !c.joined).slice(0, 3);
-  const workout = getWorkoutForWeekday();
+  const workout = resolveMemberWorkout({ dayClass: todayClass, challenges });
 
   if (!ready || !training.ready) {
     return <div className="py-20 text-center text-sm text-zinc-500">Cargando tu cuenta…</div>;

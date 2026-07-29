@@ -31,21 +31,42 @@ export function DailyWorkoutCard({
     <section className="overflow-hidden rounded-[1.75rem] border-[3px] border-zinc-500 bg-[var(--portal-card)]">
       <div className="border-b border-white/10 px-5 py-4">
         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--portal-brand-light)]">
-          Rutina del día · {workout.focus}
+          Rutina de tu clase · {workout.className}
         </p>
         <h2 className="mt-1 font-display text-xl font-black uppercase text-white">
           {workout.title}
         </h2>
+        <p className="mt-1 text-sm text-zinc-400">{workout.focus}</p>
         <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-zinc-400">
-          <span className="inline-flex items-center gap-1.5">
-            <Clock3 className="size-3.5 text-[var(--portal-brand)]" />
-            {workout.durationMin} min
-          </span>
+          {workout.time ? (
+            <span className="inline-flex items-center gap-1.5">
+              <Clock3 className="size-3.5 text-[var(--portal-brand)]" />
+              {workout.time}
+              {workout.coach ? ` · ${workout.coach}` : ''}
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5">
+              <Clock3 className="size-3.5 text-[var(--portal-brand)]" />
+              {workout.durationMin} min
+            </span>
+          )}
           <span className="inline-flex items-center gap-1.5">
             <Dumbbell className="size-3.5 text-[var(--portal-brand)]" />
-            {workout.exercises.length} ejercicios
+            {workout.exercises.length} bloques
           </span>
         </div>
+        {workout.activeChallenges.length > 0 ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {workout.activeChallenges.map((name) => (
+              <span
+                key={name}
+                className="rounded-full border border-brand/40 bg-brand/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-[var(--portal-brand-light)]"
+              >
+                Reto · {name}
+              </span>
+            ))}
+          </div>
+        ) : null}
         <p className="mt-2 text-sm text-zinc-400">{workout.levelHint}</p>
       </div>
 
@@ -62,6 +83,11 @@ export function DailyWorkoutCard({
                   <h3 className="mt-0.5 font-display text-lg font-black uppercase text-white">
                     {exercise.name}
                   </h3>
+                  {exercise.fromChallenge ? (
+                    <p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-[var(--portal-brand-light)]">
+                      Incluido por · {exercise.fromChallenge}
+                    </p>
+                  ) : null}
                   <div className="mt-2 flex flex-wrap gap-2 text-[11px] font-bold uppercase tracking-wider">
                     <span className="rounded-full bg-white/5 px-2.5 py-1 text-zinc-300">
                       {exercise.sets} series
