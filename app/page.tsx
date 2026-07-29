@@ -49,7 +49,7 @@ export default function HomePage() {
     <>
       <section className="relative flex min-h-[100svh] flex-col bg-black pt-20">
         {/* Contenedor con altura real para que el video absolute se pinte */}
-        <div className="relative h-[58vh] w-full shrink-0 sm:h-[62vh] lg:h-[66vh]">
+        <div className="relative h-[42svh] min-h-[15rem] w-full shrink-0 sm:h-[52svh] lg:h-[62svh]">
           <HeroVideoWall />
         </div>
         <div className="relative z-10 shrink-0 border-t border-brand/15 bg-black">

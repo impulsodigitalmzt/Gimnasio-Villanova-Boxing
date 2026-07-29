@@ -5,6 +5,7 @@ import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { CartProvider } from '@/components/portal/cart-context';
 import { CartHeaderButton } from '@/components/portal/cart-header-button';
+import { IosInstallHint } from '@/components/ios-install-hint';
 
 /**
  * Muestra el chrome de la landing solo fuera de /admin y /login,
@@ -30,6 +31,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
         <SiteHeader cartSlot={<CartHeaderButton />} />
         <main>{children}</main>
         <SiteFooter />
+        <IosInstallHint />
       </CartProvider>
     );
   }
@@ -39,6 +41,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
       <SiteHeader />
       <main>{children}</main>
       <SiteFooter />
+      <IosInstallHint />
     </>
   );
 }

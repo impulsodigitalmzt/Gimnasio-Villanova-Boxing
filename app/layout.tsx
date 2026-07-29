@@ -38,7 +38,7 @@ export const metadata: Metadata = {
       { url: '/logo-white.png', type: 'image/png' },
       { url: '/favicon.png', sizes: '32x32', type: 'image/png' },
     ],
-    apple: [{ url: '/logo-white.png', type: 'image/png' }],
+    apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
     shortcut: '/logo-white.png',
   },
   manifest: '/manifest.webmanifest',
@@ -51,6 +51,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   viewportFit: 'cover',
+  interactiveWidget: 'resizes-content',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

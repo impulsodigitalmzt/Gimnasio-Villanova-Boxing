@@ -4,7 +4,7 @@ import { PortalShell } from '@/components/portal/portal-shell';
 export const metadata: Metadata = {
   title: 'Portal Villanova | Portal del Socio',
   description: 'Tu membresía, clase del día y retos Villanova en el celular.',
-  manifest: '/portal-manifest.webmanifest',
+  manifest: '/manifest.webmanifest',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -16,8 +16,9 @@ export const viewport: Viewport = {
   themeColor: '#050505',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
+  maximumScale: 5,
   viewportFit: 'cover',
+  interactiveWidget: 'resizes-content',
 };
 
 export default function MemberAppLayout({ children }: { children: React.ReactNode }) {

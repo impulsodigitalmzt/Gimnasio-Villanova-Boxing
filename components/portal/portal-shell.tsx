@@ -6,6 +6,7 @@ import { CircleHelp } from 'lucide-react';
 import { PortalBottomNav } from '@/components/portal/bottom-nav';
 import { PortalShortcuts } from '@/components/portal/portal-shortcuts';
 import { HelpDrawer, HelpProvider, useHelp } from '@/components/help/help-drawer';
+import { IosInstallHint } from '@/components/ios-install-hint';
 import { CartProvider } from '@/components/portal/cart-context';
 import { CartHeaderButton } from '@/components/portal/cart-header-button';
 import { portalHelpContent } from '@/lib/portal/faq-data';
@@ -64,6 +65,7 @@ export function PortalShell({ children }: { children: React.ReactNode }) {
           </main>
 
           <PortalBottomNav />
+          <IosInstallHint offsetClassName="bottom-[5.25rem]" />
           <HelpDrawer content={portalHelpContent} theme="portal" />
         </div>
       </CartProvider>

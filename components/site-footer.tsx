@@ -64,7 +64,7 @@ export function SiteFooter() {
           </div>
         </div>
       </div>
-      <div className="border-t border-brand/10 px-5 py-6 text-center font-mono text-[10px] uppercase tracking-widest text-zinc-600">
+      <div className="border-t border-brand/10 px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-6 text-center font-mono text-[10px] uppercase tracking-widest text-zinc-600">
         © {new Date().getFullYear()} Villanova Boxing · Sitio oficial
       </div>
     </footer>
