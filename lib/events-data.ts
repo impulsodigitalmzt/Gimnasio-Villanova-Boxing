@@ -51,43 +51,43 @@ export const eventMoments = [
 export const eventPosters = [
   {
     src: eventPhoto('658798071_18088977041252708_1445315406203436050_n.jpg'),
-    alt: 'Cartel de Fernando El Búho López para Ocean Fight Night',
+    alt: 'Ejemplo de pupilo Villanova: Fernando El Búho López en Ocean Fight Night',
   },
   {
     src: eventPhoto('670550755_18088448606252708_5940485038468961549_n.jpg'),
-    alt: 'Cartel de Bruno Orozco para Ocean Fight Night',
+    alt: 'Ejemplo de pupilo Villanova: Bruno Orozco en Ocean Fight Night',
   },
   {
     src: eventPhoto('670675306_18088448597252708_3653820619240838534_n.jpg'),
-    alt: 'Cartel de Patricio Velasco para Ocean Fight Night',
+    alt: 'Ejemplo de pupilo Villanova: Patricio Velasco en Ocean Fight Night',
   },
   {
     src: eventPhoto('670774178_18088448579252708_6986398655155038135_n.jpg'),
-    alt: 'Cartel de Diego Robles para Ocean Fight Night',
+    alt: 'Ejemplo de pupilo Villanova: Diego Robles en Ocean Fight Night',
   },
   {
     src: eventPhoto('671260714_18088448588252708_2581686625217284277_n.jpg'),
-    alt: 'Cartel de Emiliano Orozco para Ocean Fight Night',
+    alt: 'Ejemplo de pupilo Villanova: Emiliano Orozco en Ocean Fight Night',
   },
   {
     src: eventPhoto('671794254_18088448615252708_5134358323398278038_n.jpg'),
-    alt: 'Cartel de Guillermo Pérez para Ocean Fight Night',
+    alt: 'Ejemplo de pupilo Villanova: Guillermo Pérez en Ocean Fight Night',
   },
   {
     src: eventPhoto('673054349_18088977020252708_5495829715197087836_n.jpg'),
-    alt: 'Cartel de Jesús El Chumy Bañuelos para Ocean Fight Night',
+    alt: 'Ejemplo de pupilo Villanova: Jesús El Chumy Bañuelos en Ocean Fight Night',
   },
   {
     src: eventPhoto('673114305_18088977050252708_6039749679606707337_n.jpg'),
-    alt: 'Cartel de Jeremy Zazueta para Ocean Fight Night',
+    alt: 'Ejemplo de pupilo Villanova: Jeremy Zazueta en Ocean Fight Night',
   },
   {
     src: eventPhoto('673800736_18088448576252708_6427537200131098401_n.jpg'),
-    alt: 'Cartel de Ricardo El Richi Sánchez para Ocean Fight Night',
+    alt: 'Ejemplo de pupilo Villanova: Ricardo El Richi Sánchez en Ocean Fight Night',
   },
   {
     src: eventPhoto('675496586_18088977032252708_3570038651494309446_n.jpg'),
-    alt: 'Cartel de Miguel Lizárraga para Ocean Fight Night',
+    alt: 'Ejemplo de pupilo Villanova: Miguel Lizárraga en Ocean Fight Night',
   },
 ] as const;
 
@@ -96,35 +96,35 @@ export const eventVideos = [
     src: eventVideo(
       'AQM8CjVSNc5eDGFZGHnwzDFWZY5DJgsMn6PIvF9H2Fz2SPwdgLNz4oTrF-86xlVIPEs-CwZJYECXUqM0-Xirn7p0io_gAKT5ZyCzhyo.mp4',
     ),
-    title: 'Ocean Fight Night',
-    copy: 'La emoción de la función desde adentro.',
+    title: 'Pupilos en la arena',
+    copy: 'Función indoor: nuestros alumnos suben al ring con público real y ambiente de competencia.',
   },
   {
     src: eventVideo(
       'AQN9Ah9mLrNi8lv18U5DfIOaiKjvaz48mzeOdB0Nyj33cQWxHBVBxR-GaY7l_OUcV499jYjcBSyg-EtlZPBtZsOY5gwfyPt8rR9_sqWiPA.mp4',
     ),
-    title: 'Acción en el ring',
-    copy: 'Rounds, técnica y el apoyo del público.',
+    title: 'Escenario frente al mar',
+    copy: 'Así se arma Ocean Fight Night en la playa: locación, ring y atmósfera mazatleca.',
   },
   {
     src: eventVideo(
       'AQNyM6Ns9xkKX0JkUcyE5z0e4NFEhk2xZoaT1S8dKp2Z4EnR5zfQxFa_Yqib4mm-rNqC0fNnJz8CQk6_EVv195yfFvzAyFhANZH5Y48.mp4',
     ),
-    title: 'Una noche diferente',
-    copy: 'Boxeo amateur junto al mar en Mazatlán.',
+    title: 'Noche amateur al aire libre',
+    copy: 'Boxeo amateur en espacios abiertos de Mazatlán: experiencia formativa, no solo un show.',
   },
   {
     src: eventVideo(
       'AQOVvkewSX5KahkbqJHvo1eJ7zw75S-2k0XxU9LJyqyeI16YM707shPrDETLHzptehfXo2iZanjNgBgoUB_GCG-I6t6Y-vFk4CHjEcxLGg.mp4',
     ),
-    title: 'La comunidad presente',
-    copy: 'Familias y aficionados viviendo cada combate.',
+    title: 'Acción bajo las luces',
+    copy: 'Rounds reales de nuestros pupilos: técnica, coraje y el trabajo de la esquina Villanova.',
   },
   {
     src: eventVideo(
       'AQPYsH9BDO-M2yCLAq25yY3V2xSH3tw64obtvgnimunGH4gYy7eltumpt7u4xoWeanZu8QnuWz9pse5A8tgcYFrD0KTGyafhRJB7dXU.mp4',
     ),
-    title: 'Detrás de la cartelera',
-    copy: 'Peleadores, esquinas y momentos que forman historia.',
+    title: 'La comunidad presente',
+    copy: 'Familias y aficionados acompañando a los alumnos: así se vive el apoyo alrededor del ring.',
   },
 ] as const;

@@ -4,30 +4,30 @@ import { ArrowRight, HeartHandshake, Instagram, ShieldCheck, Sparkles, Trophy, U
 import { EventMediaGallery } from '@/components/event-media-gallery';
 import { PageHero } from '@/components/page-hero';
 import { SectionHeading } from '@/components/section-heading';
-import { oceanFightNight } from '@/lib/events-data';
+import { oceanFightNight, eventVideos } from '@/lib/events-data';
 import { SOCIAL } from '@/components/social-links';
 
 export const metadata: Metadata = {
-  title: 'Ocean Fight Night y eventos | Villanova Boxing',
+  title: 'Eventos y Ocean Fight Night | Villanova Boxing',
   description:
-    'Conoce Ocean Fight Night: noches de boxeo amateur organizadas por Villanova Boxing en Mazatlán, con galería, videos y oportunidades de patrocinio.',
+    'Ejemplos reales de lo que Villanova Boxing hace con sus pupilos: noches amateur, ring frente al mar y comunidad en Mazatlán. No son anuncios de peleas.',
 };
 
 const eventHighlights = [
   {
     icon: Trophy,
-    title: 'Eventos para todos los niveles',
-    copy: 'Desde exhibiciones amateur hasta peleas estelares.',
+    title: 'Experiencia para nuestros pupilos',
+    copy: 'Subir al ring forma carácter: preparación, respeto y la emoción de competir amateur.',
   },
   {
     icon: ShieldCheck,
-    title: 'Una experiencia para toda la familia',
-    copy: 'Un ambiente seguro, inclusivo y lleno de adrenalina.',
+    title: 'Ambiente familiar y seguro',
+    copy: 'Noches pensadas para que familias y amigos acompañen el crecimiento de cada alumno.',
   },
   {
     icon: Users,
-    title: 'Apoya a tus favoritos',
-    copy: 'Alienta a los peleadores de Villanova y sé parte de su historia.',
+    title: 'Comunidad Villanova',
+    copy: 'No entrenas solo: la esquina, el gym y el público caminan con nuestros peleadores.',
   },
 ] as const;
 
@@ -36,22 +36,68 @@ export default function EventosPage() {
     <>
       <PageHero
         eyebrow="Ocean Fight Night · Villanova Boxing"
-        title={'VIVE LA GLORIA:\n*NUESTROS EVENTOS.*'}
-        description="No somos un gimnasio donde entrenas y te vas. Somos una comunidad que vive la pasión del boxeo y crea noches donde nuestros alumnos pueden brillar frente a todo Mazatlán."
+        title={'ASÍ FORMAMOS:\n*NUESTROS EVENTOS.*'}
+        description="Estas noches no son anuncios de boletos ni carteleras comerciales. Son ejemplos reales de lo que Villanova hace con sus pupilos: darles un escenario para crecer frente a Mazatlán."
         image={oceanFightNight.hero}
         imagePosition="center 48%"
-        primaryHref="#cartelera"
-        primaryLabel="Descubre la experiencia"
+        primaryHref="#videos"
+        primaryLabel="Ver videos reales"
       />
 
-      <section id="cartelera" className="scroll-mt-24 bg-black py-24">
+      <section className="border-b border-brand/20 bg-[#0c0c0c] py-8">
+        <div className="mx-auto max-w-[1440px] px-5 sm:px-8">
+          <p className="max-w-4xl text-sm leading-relaxed text-zinc-300 sm:text-base">
+            <span className="font-semibold text-brand-light">Aclaración importante:</span>{' '}
+            lo que ves en esta página es un <strong className="text-white">archivo de experiencias</strong>{' '}
+            con nuestros alumnos. No es publicidad de una pelea próxima ni venta de entradas.
+            Es la prueba de cómo Villanova saca a sus pupilos a escenarios reales.
+          </p>
+        </div>
+      </section>
+
+      <section id="videos" className="scroll-mt-24 bg-black py-20 sm:py-24">
+        <div className="mx-auto max-w-[1440px] px-5 sm:px-8">
+          <SectionHeading
+            eyebrow="Videos de eventos especiales"
+            title={'LO QUE HACEMOS\n*CON NUESTROS PUPILOS.*'}
+            description="Arena indoor, ring frente al mar, noches amateur y el público que acompaña. Cinco videos reales de Ocean Fight Night y funciones especiales Villanova."
+          />
+
+          <div className="mt-12 flex snap-x gap-4 overflow-x-auto pb-4 sm:grid sm:snap-none sm:grid-cols-2 sm:gap-5 sm:overflow-visible lg:grid-cols-5">
+            {eventVideos.map((item) => (
+              <article
+                key={item.src}
+                className="w-[72vw] shrink-0 snap-start overflow-hidden rounded-3xl border-[3px] border-brand/35 bg-[#111111] sm:w-auto sm:shrink"
+              >
+                <div className="relative aspect-[9/16] bg-black">
+                  <video
+                    src={item.src}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    className="absolute inset-0 size-full object-cover"
+                  />
+                </div>
+                <div className="p-4">
+                  <h3 className="font-display text-base font-semibold uppercase leading-snug text-white sm:text-lg">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-xs leading-relaxed text-zinc-400 sm:text-sm">{item.copy}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="experiencia" className="scroll-mt-24 border-t border-brand/15 bg-[#090909] py-24">
         <div className="mx-auto max-w-[1440px] px-5 sm:px-8">
           <div className="grid gap-12 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:gap-16">
             <div>
               <SectionHeading
-                eyebrow="Cartelera estelar"
-                title={'NOCHE DE\n*BOXEO AMATEUR.*'}
-                description='Ocean Fight Night es más que una serie de peleas: es un espectáculo deportivo completo. Montamos un ring profesional en locaciones únicas de Mazatlán, como Baraka Beach Club frente al mar, para vivir cada round al atardecer.'
+                eyebrow="Ocean Fight Night"
+                title={'MÁS QUE UN RING:\n*ES FORMACIÓN.*'}
+                description="Montamos un ring profesional en locaciones de Mazatlán —como Baraka Beach Club frente al mar— para que nuestros alumnos vivan la competencia amateur con respeto, seguridad y comunidad."
               />
 
               <div className="mt-12 space-y-6">
@@ -78,15 +124,16 @@ export default function EventosPage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={oceanFightNight.featuredPoster}
-                alt="Cartelera estelar de Ocean Fight Night en Baraka Beach Club"
+                alt="Ejemplo visual de una edición anterior de Ocean Fight Night"
                 className="aspect-[4/5] w-full object-cover"
               />
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/65 to-transparent p-6 pt-20">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-brand">
-                  Archivo de Ocean Fight Night
+                  Archivo · no es un anuncio
                 </p>
                 <p className="mt-2 text-sm text-zinc-300">
-                  Cartel de una edición anterior. La próxima fecha se anunciará en nuestras redes.
+                  Imagen de una edición pasada. Ilustra el tipo de experiencia que ofrecemos a
+                  nuestros pupilos; no promociona una pelea a la venta.
                 </p>
               </div>
             </figure>
@@ -94,12 +141,12 @@ export default function EventosPage() {
         </div>
       </section>
 
-      <section id="galeria" className="border-t border-brand/15 bg-[#090909] py-24">
+      <section id="galeria" className="border-t border-brand/15 bg-black py-24">
         <div className="mx-auto max-w-[1440px] px-5 sm:px-8">
           <SectionHeading
             eyebrow="Galería multimedia"
-            title={'GALERÍA DE EMOCIONES:\n*MOMENTOS CLAVE.*'}
-            description="Atardeceres frente al ring, la energía del público, el trabajo en la esquina y los peleadores que dieron vida a Ocean Fight Night."
+            title={'MOMENTOS QUE\n*FORMAN CARÁCTER.*'}
+            description="Fotos, videos y rostros de alumnos que ya vivieron la experiencia. Todo esto es muestra de trabajo con pupilos, no cartelera comercial."
           />
           <div className="mt-12">
             <EventMediaGallery />
@@ -120,21 +167,22 @@ export default function EventosPage() {
         <div className="relative mx-auto grid max-w-[1440px] gap-12 px-5 sm:px-8 lg:grid-cols-[1.1fr_.9fr] lg:items-center">
           <div>
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-brand">
-              Próxima cartelera
+              Forma parte de Villanova
             </p>
             <h2 className="mt-4 max-w-4xl font-display text-4xl font-black uppercase leading-[0.95] text-white sm:text-6xl">
-              ¿QUIERES SER PARTE DE <span className="text-gradient-brand">LA PRÓXIMA NOCHE?</span>
+              ¿QUIERES QUE TU HISTORIA{' '}
+              <span className="text-gradient-brand">TAMBIÉN SUBA AL RING?</span>
             </h2>
             <p className="mt-6 max-w-2xl text-base leading-relaxed text-zinc-300 sm:text-lg">
-              Ya sea que quieras entrenar para competir o simplemente disfrutar una noche de boxeo de
-              alto nivel, Villanova Boxing es tu lugar.
+              Si buscas entrenar, competir amateur o simplemente crecer con disciplina, este es el
+              camino. Las fechas de funciones se comparten en redes cuando hay una nueva edición —
+              aquí mostramos el tipo de experiencia, no una venta de boletos.
             </p>
 
             <div className="mt-8 rounded-2xl border border-brand/35 bg-brand/10 p-5">
               <p className="flex items-start gap-3 font-semibold text-brand-light">
                 <Sparkles className="mt-0.5 size-5 shrink-0" />
-                Mantente atento a nuestras redes sociales para conocer la próxima fecha y la venta de
-                boletos.
+                Síguenos en Instagram para ver nuevas funciones y el avance de nuestros pupilos.
               </p>
             </div>
 
@@ -145,13 +193,13 @@ export default function EventosPage() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-full bg-brand px-6 py-4 text-xs font-black uppercase tracking-wider text-black hover:bg-brand-light"
               >
-                <Instagram className="size-4" /> Seguir novedades
+                <Instagram className="size-4" /> Ver más en Instagram
               </a>
               <Link
                 href="/contacto"
                 className="inline-flex items-center gap-2 rounded-full border border-brand/40 px-6 py-4 text-xs font-black uppercase tracking-wider text-white hover:border-brand hover:bg-brand/10"
               >
-                Quiero competir <ArrowRight className="size-4" />
+                Quiero entrenar <ArrowRight className="size-4" />
               </Link>
             </div>
           </div>
@@ -160,7 +208,7 @@ export default function EventosPage() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={oceanFightNight.sponsors}
-              alt="Patrocinadores que han formado parte de Ocean Fight Night"
+              alt="Marcas y aliados que han acompañado Ocean Fight Night"
               className="aspect-square w-full object-cover"
             />
             <div className="p-6 sm:p-8">
@@ -168,11 +216,11 @@ export default function EventosPage() {
                 <HeartHandshake className="size-5" />
               </span>
               <h3 className="mt-5 font-display text-2xl font-semibold uppercase text-white">
-                Haz que tu marca suba al ring
+                Aliados de la formación
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-zinc-400 sm:text-base">
-                ¿Te interesa patrocinar? Asocia tu marca con una de las experiencias deportivas más
-                emocionantes de Mazatlán.
+                Marcas que han acompañado estas noches de crecimiento para nuestros alumnos. Si
+                quieres sumar tu marca a la próxima experiencia formativa, hablemos.
               </p>
               <Link
                 href="/contacto"

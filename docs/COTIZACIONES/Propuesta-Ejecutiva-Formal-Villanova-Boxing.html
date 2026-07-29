@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Propuesta Ejecutiva Formal — Villanova Boxing</title>
+  <style>
+    :root {
+      --ink: #141414;
+      --muted: #5c5c5c;
+      --line: #e4e4e4;
+      --soft: #f6f6f6;
+      --accent: #1a1a1a;
+      --ok: #1f7a4d;
+      --no: #9a9a9a;
+      --brand: #c9a227;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      color: var(--ink);
+      background: #e8e8e8;
+      line-height: 1.55;
+    }
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: #111;
+      color: #fff;
+      font-size: 13px;
+    }
+    .toolbar button, .toolbar a {
+      appearance: none;
+      border: 0;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      color: #111;
+      background: #fff;
+    }
+    .toolbar .ghost {
+      background: transparent;
+      color: #fff;
+      border: 1px solid #5f5f5f;
+    }
+    .doc {
+      max-width: 880px;
+      margin: 24px auto 48px;
+      background: #fff;
+      border: 1px solid #cfcfcf;
+      overflow: hidden;
+    }
+    .cover {
+      background: #111;
+      color: #fff;
+      padding: 32px 36px 28px;
+      border-bottom: 4px solid var(--brand);
+    }
+    .cover .eyebrow {
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #bdbdbd;
+      margin: 0 0 12px;
+    }
+    .cover h1 {
+      margin: 0;
+      font-size: 1.7rem;
+      line-height: 1.2;
+      font-weight: 750;
+    }
+    .cover .tagline {
+      margin: 12px 0 0;
+      color: #d4d4d4;
+      font-size: 1rem;
+    }
+    .content {
+      padding: 32px 36px 44px;
+    }
+    h2 {
+      margin: 32px 0 12px;
+      font-size: 1.15rem;
+      border-bottom: 2px solid #111;
+      padding-bottom: 7px;
+    }
+    h3 {
+      margin: 18px 0 8px;
+      font-size: 1.02rem;
+    }
+    p { margin: 0 0 11px; }
+    .muted { color: var(--muted); }
+    .meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 28px;
+      margin: 4px 0 18px;
+      font-size: 0.95rem;
+      padding: 14px 16px;
+      background: var(--soft);
+      border-radius: 10px;
+      border: 1px solid var(--line);
+    }
+    .summary-card {
+      border: 2px solid #111;
+      border-radius: 14px;
+      padding: 18px 18px 16px;
+      background: #fafafa;
+      margin: 16px 0;
+    }
+    .summary-card .label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .summary-card .price {
+      font-size: 2.1rem;
+      font-weight: 800;
+      margin: 6px 0 4px;
+      letter-spacing: -0.02em;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 16px;
+      font-size: 0.92rem;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 9px 11px;
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      background: var(--soft);
+      font-weight: 700;
+    }
+    td.num, th.num {
+      text-align: right;
+      white-space: nowrap;
+    }
+    .callout {
+      border: 1px solid #ddd;
+      background: #f9f9f9;
+      border-radius: 10px;
+      padding: 13px 15px;
+      margin: 14px 0;
+    }
+    .callout.brand {
+      border-color: #e6d48a;
+      background: #fffbeb;
+    }
+    .oklist, .dotlist, .nolist {
+      margin: 8px 0 10px;
+      padding-left: 1.15em;
+    }
+    .oklist li, .dotlist li, .nolist li {
+      margin: 4px 0;
+    }
+    .module {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0;
+      margin: 16px 0;
+      overflow: hidden;
+      background: #fff;
+    }
+    .module-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      background: #111;
+      color: #fff;
+    }
+    .module-head.optional {
+      background: #2a2a2a;
+    }
+    .module-head .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: #fff;
+      color: #111;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .module-head .badge.gold {
+      background: var(--brand);
+      color: #111;
+    }
+    .module-head h3 {
+      margin: 0;
+      color: #fff;
+      font-size: 1.05rem;
+    }
+    .module-head .why {
+      margin: 6px 0 0;
+      color: #cfcfcf;
+      font-size: 0.9rem;
+    }
+    .module-price {
+      text-align: right;
+      white-space: nowrap;
+    }
+    .module-price .once {
+      font-size: 1.35rem;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+    .module-price .month {
+      margin-top: 4px;
+      font-size: 0.85rem;
+      color: #d0d0d0;
+    }
+    .module-body {
+      padding: 14px 16px 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .module-col h4 {
+      margin: 0 0 8px;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+    .module-col ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .module-col li {
+      position: relative;
+      padding: 6px 0 6px 22px;
+      border-bottom: 1px solid var(--line);
+      font-size: 0.93rem;
+    }
+    .module-col li:last-child { border-bottom: 0; }
+    .module-col.includes li::before {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: 11px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--ok);
+    }
+    .module-col.excludes li::before {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: 11px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--no);
+    }
+    .phase {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin: 10px 0;
+      background: #fcfcfc;
+    }
+    .phase b { display: block; margin-bottom: 4px; }
+    .sign {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 26px;
+    }
+    .sign .line {
+      border-top: 1px solid #8f8f8f;
+      padding-top: 8px;
+      margin-top: 48px;
+      font-size: 0.9rem;
+    }
+    .footer {
+      margin-top: 24px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .note-box {
+      border-left: 4px solid var(--brand);
+      background: #fffdf5;
+      padding: 12px 14px;
+      margin: 12px 0 16px;
+      border-radius: 0 10px 10px 0;
+    }
+    @media (max-width: 700px) {
+      .meta, .sign, .module-body { grid-template-columns: 1fr; }
+      .content { padding: 20px 16px 28px; }
+      .summary-card .price { font-size: 1.6rem; }
+      .module-head { flex-direction: column; }
+      .module-price { text-align: left; }
+    }
+    @media print {
+      @page {
+        size: A4;
+        margin: 12mm 13mm 14mm;
+      }
+      .toolbar { display: none !important; }
+      html, body {
+        background: #fff;
+        font-size: 10.5pt;
+        line-height: 1.42;
+      }
+      .doc { margin: 0; border: 0; max-width: none; }
+      .cover {
+        padding: 20px 24px 17px;
+      }
+      .cover .eyebrow {
+        margin-bottom: 7px;
+      }
+      .cover h1 {
+        font-size: 1.5rem;
+      }
+      .cover .tagline {
+        margin-top: 7px;
+        font-size: 0.92rem;
+      }
+      .content {
+        padding: 18px 24px 28px;
+      }
+      h2 {
+        margin: 20px 0 9px;
+        padding-bottom: 5px;
+        break-after: avoid-page;
+        page-break-after: avoid;
+      }
+      h3 {
+        break-after: avoid-page;
+        page-break-after: avoid;
+      }
+      p {
+        margin-bottom: 8px;
+      }
+      .meta {
+        padding: 10px 13px;
+        margin-bottom: 12px;
+        gap: 3px 24px;
+      }
+      .meta p {
+        margin-bottom: 3px;
+      }
+      .summary-card {
+        padding: 14px 16px 13px;
+        margin: 12px 0;
+      }
+      .summary-card .price {
+        font-size: 1.85rem;
+        margin: 3px 0;
+      }
+      .cover, .module-head {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .summary-card,
+      .callout,
+      .note-box,
+      .module,
+      .phase,
+      .sign,
+      table,
+      tr {
+        break-inside: avoid-page;
+        page-break-inside: avoid;
+      }
+      .module {
+        margin: 12px 0;
+      }
+      .module-head {
+        padding: 11px 14px;
+      }
+      .module-body {
+        padding: 10px 14px 12px;
+      }
+      .module-col li {
+        padding-top: 4px;
+        padding-bottom: 4px;
+      }
+      .module-col.includes li::before,
+      .module-col.excludes li::before {
+        top: 9px;
+      }
+      table {
+        margin: 9px 0 13px;
+      }
+      th, td {
+        padding: 7px 9px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <span><strong>Propuesta Ejecutiva Formal</strong> · Villanova Boxing</span>
+    <span>
+      <button class="ghost" type="button" onclick="window.print()">Imprimir / PDF</button>
+      <a href="#" id="downloadHtml">Descargar HTML</a>
+    </span>
+  </div>
+
+  <article class="doc">
+    <header class="cover">
+      <p class="eyebrow">Propuesta comercial</p>
+      <h1>Plataforma Digital<br />Villanova Boxing Gym</h1>
+      <p class="tagline">Web comercial · Portal del alumno · CRM · Tienda · Mazatlán, Sinaloa</p>
+    </header>
+
+    <section class="content">
+      <div class="meta">
+        <p><strong>Fecha:</strong> 29/07/2026</p>
+        <p><strong>Cliente:</strong> Villanova Boxing</p>
+        <p><strong>Proyecto:</strong> Plataforma web integral del gimnasio</p>
+        <p><strong>Ubicación:</strong> Mazatlán, Sinaloa, México</p>
+        <p><strong>Vigencia:</strong> 10 días naturales</p>
+        <p><strong>Moneda:</strong> MXN (+ IVA si se factura)</p>
+      </div>
+
+      <h2>Resumen ejecutivo</h2>
+      <p>
+        Propuesta para digitalizar la operación de <strong>Villanova Boxing</strong> en Mazatlán:
+        sitio web, portal del alumno, CRM, tienda, pase digital y retos.
+        Puede contratarse <strong>todo el sistema</strong> o <strong>por módulos</strong>,
+        según el ritmo de inversión del negocio.
+      </p>
+
+      <h2>Dos opciones de contratación</h2>
+
+      <div class="summary-card" style="border-color: var(--brand); background: #fffdf5;">
+        <div class="label">Opción 1 · Sistema completo</div>
+        <div class="price">$156,500 MXN</div>
+        <p style="margin:0 0 8px;">
+          Todo el sistema de una sola vez: web comercial, portal del alumno, CRM administrativo,
+          tienda, pase digital y retos. Precio especial (ahorro de $8,000 vs. sumar módulo por módulo).
+        </p>
+        <p style="margin:0 0 4px;"><strong>Módulos incluidos:</strong> Arranque · Portal del Alumno · CRM · Tienda · Pase Digital · Retos</p>
+        <p style="margin:10px 0 0;"><strong>Mensualidad:</strong> <span style="font-size:1.25rem;font-weight:800;">$4,500</span> (base; el cliente administra con el CRM).</p>
+        <p class="muted" style="margin:6px 0 0;font-size:0.9rem;">Pago: $78,250 al iniciar · $78,250 a la entrega.</p>
+      </div>
+
+      <div class="summary-card">
+        <div class="label">Opción 2 · Por módulos</div>
+        <div class="price" style="font-size:1.55rem;">Desde $55,000 MXN</div>
+        <p style="margin:0 0 8px;">
+          Empieza con el <strong>Arranque</strong> (web lista para operar) y suma después
+          portal, CRM, tienda, pase o retos, solo cuando los necesite.
+        </p>
+        <p style="margin:0 0 4px;"><strong>Si suma los 6 módulos:</strong> $164,500 en desarrollo.</p>
+        <p style="margin:10px 0 0;"><strong>Mensualidad:</strong> <span style="font-size:1.25rem;font-weight:800;">$4,500</span> base + admin. aparte solo si el proveedor opera algún módulo por usted.</p>
+        <p class="muted" style="margin:6px 0 0;font-size:0.9rem;">Detalle de cada módulo y precios unitarios más abajo.</p>
+      </div>
+
+      <div class="callout">
+        <strong>Mensualidad base ($4,500):</strong> servidores, plataformas y soporte — siempre.
+        <strong> Admin. aparte:</strong> solo si el proveedor administra un módulo (ej. catálogo de tienda: +$1,200 → total $5,700).
+        Cuando usted lo administra, se libera ese cargo extra.
+      </div>
+
+      <h2>Desglose de módulos (opción por fases)</h2>
+      <p class="muted">
+        Si elige ir por módulos, aquí está en qué consiste cada uno, su precio y el cargo de administración
+        (solo si el proveedor lo opera por usted).
+      </p>
+
+      <!-- MÓDULO 1 -->
+      <div class="module">
+        <div class="module-head">
+          <div>
+            <span class="badge gold">Recomendado para iniciar</span>
+            <h3>1 · Arranque (Módulo Base)</h3>
+            <p class="why">Tu web lista para operar: marca, planes, clases y contacto en Mazatlán.</p>
+          </div>
+          <div class="module-price">
+            <div class="once">$55,000</div>
+            <div class="month">Mensualidad base: $4,500</div>
+          </div>
+        </div>
+        <div class="module-body">
+          <div class="module-col includes">
+            <h4>Qué incluye</h4>
+            <ul>
+              <li>Home, Quién soy, Instalaciones, Planes, Clases, Eventos, Contacto</li>
+              <li>Diseño responsive (móvil, tablet y PC)</li>
+              <li>Menú, marca y experiencia visual Villanova</li>
+              <li>Presentación de membresías y CTAs comerciales</li>
+              <li>WhatsApp y formulario de contacto</li>
+              <li>Publicación en servidor + mensualidad base de operación</li>
+            </ul>
+          </div>
+          <div class="module-col excludes">
+            <h4>Qué no incluye</h4>
+            <ul>
+              <li>Portal del alumno con cuenta y renovaciones</li>
+              <li>CRM de socios y agenda administrativa</li>
+              <li>Tienda de merch con carrito y pago</li>
+              <li>Pase digital / QR</li>
+              <li>Robot de WhatsApp</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- MÓDULO 2 -->
+      <div class="module">
+        <div class="module-head optional">
+          <div>
+            <span class="badge">Opcional</span>
+            <h3>2 · Portal del Alumno</h3>
+            <p class="why">El socio entra a su panel: vigencia, clases, cuenta y renovación.</p>
+          </div>
+          <div class="module-price">
+            <div class="once">$27,500</div>
+            <div class="month">Admin. aparte (si el proveedor lo opera): +$1,000</div>
+          </div>
+        </div>
+        <div class="module-body">
+          <div class="module-col includes">
+            <h4>Qué incluye</h4>
+            <ul>
+              <li>Login / acceso alumnos (sesión persistente)</li>
+              <li>Dashboard con estatus de membresía y próximo pago</li>
+              <li>Sección de clases / rutinas del socio</li>
+              <li>Cuenta y datos de perfil</li>
+              <li>Flujo de pago / renovación de membresía</li>
+              <li>Atajos fijos: Clases · Tienda · Retos · Cuenta</li>
+            </ul>
+          </div>
+          <div class="module-col excludes">
+            <h4>Qué no incluye</h4>
+            <ul>
+              <li>Panel CRM del gimnasio (módulo 3)</li>
+              <li>Catálogo de tienda completo (módulo 4)</li>
+              <li>Pase digital QR (módulo 5)</li>
+              <li>Producción de videos o contenido editorial</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- MÓDULO 3 -->
+      <div class="module">
+        <div class="module-head optional">
+          <div>
+            <span class="badge">Opcional · libera admin. operativa</span>
+            <h3>3 · CRM Administrativo</h3>
+            <p class="why">Panel para que el gym administre socios, agenda, productos y rutinas sin depender del proveedor.</p>
+          </div>
+          <div class="module-price">
+            <div class="once">$25,000</div>
+            <div class="month">Admin. aparte (si el proveedor lo opera): +$1,000</div>
+          </div>
+        </div>
+        <div class="module-body">
+          <div class="module-col includes">
+            <h4>Qué incluye</h4>
+            <ul>
+              <li>Panel admin con acceso restringido</li>
+              <li>Gestión de socios / clientes activos</li>
+              <li>Agenda de clases y horarios</li>
+              <li>Administración de productos, precios y características</li>
+              <li>Administración de rutinas</li>
+              <li>Visibilidad de estatus para renovaciones</li>
+            </ul>
+          </div>
+          <div class="module-col excludes">
+            <h4>Qué no incluye</h4>
+            <ul>
+              <li>No sustituye la tienda pública de merch (módulo 4)</li>
+              <li>No es contabilidad fiscal ni nómina</li>
+              <li>No incluye campañas de marketing pagadas</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- MÓDULO 4 -->
+      <div class="module">
+        <div class="module-head optional">
+          <div>
+            <span class="badge">Opcional</span>
+            <h3>4 · Tienda Villanova</h3>
+            <p class="why">Merch y gear: catálogo, carrito, checkout y recogida en sucursal.</p>
+          </div>
+          <div class="module-price">
+            <div class="once">$23,000</div>
+            <div class="month">Admin. aparte (si el proveedor opera el catálogo): +$1,200</div>
+          </div>
+        </div>
+        <div class="module-body">
+          <div class="module-col includes">
+            <h4>Qué incluye</h4>
+            <ul>
+              <li>Catálogo público y tienda dentro del portal</li>
+              <li>Carrito, checkout y confirmación de pedido</li>
+              <li>Descuento socio configurable</li>
+              <li>Recogida en sucursal (sin envío a domicilio)</li>
+              <li>Registro de pedidos para seguimiento</li>
+            </ul>
+          </div>
+          <div class="module-col excludes">
+            <h4>Qué no incluye</h4>
+            <ul>
+              <li>Panel para que el gym agregue productos solo (eso es el CRM / admin.)</li>
+              <li>Inventario físico ni logística de paquetería</li>
+              <li>Comisiones de la pasarela de pagos (van aparte)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- MÓDULO 5 -->
+      <div class="module">
+        <div class="module-head optional">
+          <div>
+            <span class="badge">Opcional</span>
+            <h3>5 · Pase Digital</h3>
+            <p class="why">Acceso digital del socio (pase / QR) listo para presentación en recepción.</p>
+          </div>
+          <div class="module-price">
+            <div class="once">$18,000</div>
+            <div class="month">Admin. aparte (si el proveedor lo opera): +$600</div>
+          </div>
+        </div>
+        <div class="module-body">
+          <div class="module-col includes">
+            <h4>Qué incluye</h4>
+            <ul>
+              <li>Página / vista de pase digital del socio</li>
+              <li>Identificación visual Villanova</li>
+              <li>Vinculación con estatus de membresía</li>
+              <li>Uso en recepción / control de acceso operativo</li>
+            </ul>
+          </div>
+          <div class="module-col excludes">
+            <h4>Qué no incluye</h4>
+            <ul>
+              <li>Torniquetes o hardware de acceso físico</li>
+              <li>Apps nativas iOS/Android en tiendas</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- MÓDULO 6 -->
+      <div class="module">
+        <div class="module-head optional">
+          <div>
+            <span class="badge">Opcional</span>
+            <h3>6 · Retos Villanova</h3>
+            <p class="why">Retos comerciales: inscripción, seguimiento y motivación del alumno.</p>
+          </div>
+          <div class="module-price">
+            <div class="once">$16,000</div>
+            <div class="month">Admin. aparte (si el proveedor lo opera): +$500</div>
+          </div>
+        </div>
+        <div class="module-body">
+          <div class="module-col includes">
+            <h4>Qué incluye</h4>
+            <ul>
+              <li>Sección pública de retos</li>
+              <li>Inscripción / acceso desde el portal</li>
+              <li>Seguimiento básico de participación</li>
+              <li>Integración con flujo de pago del portal</li>
+            </ul>
+          </div>
+          <div class="module-col excludes">
+            <h4>Qué no incluye</h4>
+            <ul>
+              <li>Grabación o edición de videos del reto</li>
+              <li>Premios físicos ni logística de entregas</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <h2>Dos mensualidades: cómo se entienden</h2>
+      <p>
+        El <strong>pago único de desarrollo</strong> construye el módulo (diseño, programación, pruebas y puesta en marcha).
+        Eso es independiente de lo que se paga cada mes.
+      </p>
+
+      <h3>1) Mensualidad base · $4,500 (siempre)</h3>
+      <p>
+        Cubre que la plataforma <strong>exista y funcione</strong> en internet. El cliente no administra ni paga por separado
+        servidores ni plataformas técnicas: eso va dentro de este cargo.
+      </p>
+      <ul class="oklist">
+        <li><strong>Servidores / hosting</strong> de la plataforma en producción.</li>
+        <li><strong>Plataformas técnicas</strong> (base de datos, autenticación, despliegue, almacenamiento).</li>
+        <li><strong>Supervisión técnica</strong>, corrección de fallas y soporte (horario de atención).</li>
+        <li><strong>Actualizaciones de seguridad</strong> y mantenimiento preventivo.</li>
+        <li><strong>Personal técnico</strong> del proveedor para operación de infraestructura (no es nómina del gym).</li>
+        <li>Ajustes ligeros del Arranque: textos y contenido comercial básico.</li>
+      </ul>
+      <p><strong>Esta mensualidad no se libera.</strong> Continúa aunque el cliente ya administre todos sus módulos.</p>
+
+      <h3>2) Mensualidad de administración · aparte de la base</h3>
+      <p>
+        Se cobra <strong>solo si el proveedor tiene que administrar el contenido u operación de un módulo</strong>
+        porque el cliente aún no lo hace por sí mismo (falta el panel administrador o decide no operarlo).
+      </p>
+      <div class="callout brand">
+        <p style="margin:0 0 8px;"><strong>Ejemplo Tienda (totales ya calculados):</strong></p>
+        <ul class="dotlist" style="margin:0;">
+          <li>Hay tienda desarrollada, pero <strong>no</strong> hay administrador para que el gym agregue productos, precios o características.</li>
+          <li>El proveedor administra el catálogo → mensualidad = <strong>$4,500 + $1,200 = $5,700</strong>.</li>
+          <li>Se desarrolla el administrador (CRM) y el cliente lo opera → se libera el +$1,200 → mensualidad = <strong>$4,500</strong>.</li>
+        </ul>
+      </div>
+      <ul class="dotlist">
+        <li>La misma lógica aplica a Portal, CRM, Pase Digital y Retos: si el proveedor lo administra, se suma el cargo de ese módulo; si el cliente lo administra, se libera.</li>
+        <li>Pueden coexistir varios cargos de administración a la vez (uno por módulo que el proveedor opere).</li>
+        <li>La base de $4,500 siempre se mantiene.</li>
+      </ul>
+
+      <h3>Qué no cubre ninguna mensualidad</h3>
+      <ul class="nolist">
+        <li>Comisiones por transacción de la pasarela de pagos (Mercado Pago u otra).</li>
+        <li>Número / cuenta de WhatsApp Business del gimnasio (propiedad del cliente).</li>
+        <li>Desarrollo de módulos nuevos (tienen pago único aparte).</li>
+        <li>Rediseños mayores, campañas de marketing o producción audiovisual.</li>
+        <li>Equipamiento físico del gym (cámaras, torniquetes, impresoras, etc.).</li>
+      </ul>
+
+      <h2>Precio de cada módulo (referencia)</h2>
+      <p class="muted">
+        Misma tabla de la Opción 2. El pago único es el desarrollo. “Admin. aparte” solo aplica
+        si el proveedor administra ese módulo; al pasarlo al cliente, esa columna queda en $0.
+        La base de $4,500 permanece.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Módulo</th>
+            <th class="num">Pago único</th>
+            <th class="num">Admin. aparte</th>
+            <th>Cuándo se libera el admin.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1. Arranque (Base)</strong></td>
+            <td class="num">$55,000</td>
+            <td class="num">$4,500 base</td>
+            <td>No se libera (infraestructura)</td>
+          </tr>
+          <tr>
+            <td>2. Portal del Alumno</td>
+            <td class="num">$27,500</td>
+            <td class="num">+$1,000</td>
+            <td>Cuando el cliente lo administra</td>
+          </tr>
+          <tr>
+            <td>3. CRM Administrativo</td>
+            <td class="num">$25,000</td>
+            <td class="num">+$1,000</td>
+            <td>Cuando el cliente opera el panel</td>
+          </tr>
+          <tr>
+            <td>4. Tienda Villanova</td>
+            <td class="num">$23,000</td>
+            <td class="num">+$1,200</td>
+            <td>Cuando el cliente administra productos/precios</td>
+          </tr>
+          <tr>
+            <td>5. Pase Digital</td>
+            <td class="num">$18,000</td>
+            <td class="num">+$600</td>
+            <td>Cuando el cliente lo administra</td>
+          </tr>
+          <tr>
+            <td>6. Retos Villanova</td>
+            <td class="num">$16,000</td>
+            <td class="num">+$500</td>
+            <td>Cuando el cliente lo administra</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Escenarios con totales ya calculados</h2>
+      <p class="muted">
+        Elija el escenario: los totales de desarrollo y de mensualidad.
+      </p>
+
+      <h3>A) Solo Arranque (recomendado para iniciar por fases)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Concepto</th>
+            <th class="num">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Desarrollo (una sola vez)</td>
+            <td class="num"><strong>$55,000</strong></td>
+          </tr>
+          <tr>
+            <td>Mensualidad base (cada mes)</td>
+            <td class="num"><strong>$4,500</strong></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>B) Desarrollo por módulos (si prefiere ir por fases)</h3>
+      <p class="muted">Totales de desarrollo. Mensualidad final = solo $4,500 cuando el gym administra sus módulos.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Combinación desarrollada</th>
+            <th class="num">Total desarrollo</th>
+            <th class="num">Mensualidad final</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Solo Arranque</td>
+            <td class="num">$55,000</td>
+            <td class="num">$4,500</td>
+          </tr>
+          <tr>
+            <td>Arranque + Portal del Alumno</td>
+            <td class="num">$82,500</td>
+            <td class="num">$4,500</td>
+          </tr>
+          <tr>
+            <td>Arranque + Portal + CRM</td>
+            <td class="num">$107,500</td>
+            <td class="num">$4,500</td>
+          </tr>
+          <tr>
+            <td>Arranque + Portal + CRM + Tienda</td>
+            <td class="num">$130,500</td>
+            <td class="num">$4,500</td>
+          </tr>
+          <tr>
+            <td>Arranque + Portal + CRM + Tienda + Pase</td>
+            <td class="num">$148,500</td>
+            <td class="num">$4,500</td>
+          </tr>
+          <tr>
+            <td>Suma módulo por módulo (1 al 6)</td>
+            <td class="num">$164,500</td>
+            <td class="num">$4,500</td>
+          </tr>
+          <tr>
+            <td><strong>Sistema completo · precio especial</strong></td>
+            <td class="num"><strong>$156,500</strong></td>
+            <td class="num"><strong>$4,500</strong></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>C) Ejemplo Tienda: base + administración aparte</h3>
+      <div class="callout brand">
+        <p style="margin:0 0 8px;"><strong>Caso real (totales ya calculados):</strong></p>
+        <ol class="dotlist" style="margin:0; padding-left:1.2em;">
+          <li>Se desarrolla la <strong>Tienda</strong> ($23,000). El sitio vende, pero el gym aún no tiene administrador para productos, precios y características.</li>
+          <li>El proveedor administra el catálogo → mensualidad = <strong>$4,500 + $1,200 = $5,700</strong>.</li>
+          <li>Se desarrolla el <strong>CRM / administrador</strong> ($25,000) y el cliente carga productos él mismo → se libera el +$1,200.</li>
+          <li>Mensualidad resultante = <strong>$4,500</strong> (solo la base). La base nunca se quita.</li>
+        </ol>
+      </div>
+
+      <h3>D) Si el proveedor administra varios módulos a la vez</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Situación</th>
+            <th class="num">Mensualidad (base + admin.)</th>
+            <th class="num">Cuando el cliente administra todo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Solo base</td>
+            <td class="num">$4,500</td>
+            <td class="num">$4,500</td>
+          </tr>
+          <tr>
+            <td>Base + admin. Tienda</td>
+            <td class="num">$5,700</td>
+            <td class="num">$4,500</td>
+          </tr>
+          <tr>
+            <td>Base + admin. Portal</td>
+            <td class="num">$5,500</td>
+            <td class="num">$4,500</td>
+          </tr>
+          <tr>
+            <td>Base + admin. Portal + CRM</td>
+            <td class="num">$6,500</td>
+            <td class="num">$4,500</td>
+          </tr>
+          <tr>
+            <td>Base + admin. Portal + CRM + Tienda</td>
+            <td class="num">$7,700</td>
+            <td class="num">$4,500</td>
+          </tr>
+          <tr>
+            <td>Base + admin. de todos los opcionales (2 al 6)</td>
+            <td class="num">$8,800</td>
+            <td class="num">$4,500</td>
+          </tr>
+          <tr>
+            <td><strong>Sistema completo (cliente administra)</strong></td>
+            <td class="num"><strong>$4,500</strong></td>
+            <td class="num"><strong>$4,500</strong></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Lineamientos Comerciales</h2>
+      <h3>I. Condiciones y Ejecución</h3>
+      <ul class="dotlist">
+        <li>Horario de atención: lunes a viernes, 9:00 a 18:00 (Tiempo del Pacífico · Mazatlán).</li>
+        <li>Cronograma sujeto a entrega de materiales, logotipos, textos, fotos y accesos por parte del cliente.</li>
+        <li>Cambios fuera de alcance se cotizan por separado.</li>
+      </ul>
+
+      <h3>II. Pago, Garantía y Propiedad</h3>
+      <ul class="dotlist">
+        <li>Arranque: <strong>$27,500</strong> al iniciar y <strong>$27,500</strong> al publicar (total desarrollo: <strong>$55,000</strong>).</li>
+        <li>Sistema completo (precio especial): <strong>$78,250</strong> al iniciar y <strong>$78,250</strong> a la entrega (total: <strong>$156,500</strong>).</li>
+        <li>Mensualidad base: <strong>$4,500</strong> cada mes (permanente).</li>
+        <li>Mensualidad de administración: solo si el proveedor opera un módulo por el cliente; se libera cuando el cliente lo administra.</li>
+        <li>Módulos opcionales: 50% al iniciar el módulo y 50% a la entrega (salvo acuerdo distinto por escrito).</li>
+        <li>Garantía técnica: 90 días naturales contra errores de programación del alcance entregado.</li>
+        <li>Al liquidar el 100% del desarrollo contratado de un módulo, la propiedad del código entregado de ese módulo es del cliente.</li>
+      </ul>
+
+      <h3>III. Infraestructura y Operación</h3>
+      <ul class="dotlist">
+        <li>La mensualidad base incluye infraestructura (servidor, base de datos, autenticación y servicios afines), soporte y mantenimiento técnico.</li>
+        <li>La administración de contenidos de módulos (productos, socios, retos, etc.) es un cargo aparte, solo si la realiza el proveedor.</li>
+        <li>Las comisiones por transacción de la pasarela de pagos no forman parte de este presupuesto técnico.</li>
+        <li>Se acompaña el despliegue, la configuración y la estabilización inicial de cada módulo entregado.</li>
+      </ul>
+
+      <h2>Cronología de Implementación (post-aceptación)</h2>
+      <div class="phase">
+        <b>Fase 1 · Preparación (Semana 1)</b>
+        Onboarding, objetivos comerciales, recepción de marca, fotos, textos, planes y accesos.
+      </div>
+      <div class="phase">
+        <b>Fase 2 · Arranque comercial (Semanas 2–4)</b>
+        Construcción del sitio público, membresías, contacto, experiencia móvil y publicación.
+      </div>
+      <div class="phase">
+        <b>Fase 3 · Módulos contratados (calendario por módulo)</b>
+        Portal, CRM, Tienda, Pase y/o Retos según el orden acordado. Cuando el cliente asume la administración de un módulo, se libera ese cargo aparte.
+      </div>
+      <div class="phase">
+        <b>Fase 4 · QA, capacitación y estabilización</b>
+        Pruebas, ajustes finales, capacitación al equipo Villanova y salida a producción de cada módulo.
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Fase</th>
+            <th>Actividad clave</th>
+            <th>Duración estimada</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Onboarding + recepción de activos</td>
+            <td>3–5 días</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Módulo Base (Arranque) a producción</td>
+            <td>10–18 días</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Cada módulo opcional (según contrato)</td>
+            <td>7–20 días c/u</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>QA + capacitación + estabilización</td>
+            <td>5–10 días por entrega</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Siguiente paso para formalizar</h2>
+      <ol class="dotlist">
+        <li>Elegir camino:
+          <ul class="dotlist">
+            <li><strong>Arranque por fases:</strong> $55,000 + $4,500 mensuales base, y módulos después.</li>
+            <li><strong>Sistema completo (precio especial):</strong> $156,500 + $4,500 mensuales base (ahorro de $8,000 vs. suma modular).</li>
+          </ul>
+        </li>
+        <li>Si va por fases, elegir módulos de la tabla (totales ya calculados).</li>
+        <li>Definir quién administra cada módulo (cliente o proveedor).</li>
+        <li>Firmar alcance y liquidar anticipo ($27,500 Arranque · o $78,250 sistema completo).</li>
+        <li>Iniciar fase de onboarding.</li>
+      </ol>
+
+      <div class="sign">
+        <div>
+          <div class="line">
+            <strong>Por el proveedor</strong><br />
+            Nombre / Cargo / Fecha
+          </div>
+        </div>
+        <div>
+          <div class="line">
+            <strong>Por Villanova Boxing</strong><br />
+            Nombre / Cargo / Fecha
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        Documento ejecutivo formal · Presupuesto modular con liberación de mensualidad · Material exclusivo para Villanova Boxing ·
+        Mazatlán, Sinaloa, México · Julio 2026 · Confidencial.
+      </div>
+    </section>
+  </article>
+
+  <script>
+    document.getElementById('downloadHtml').addEventListener('click', function (e) {
+      e.preventDefault();
+      const blob = new Blob([document.documentElement.outerHTML], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Propuesta-Ejecutiva-Formal-Villanova-Boxing.html';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>

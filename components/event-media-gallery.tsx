@@ -8,13 +8,13 @@ type GalleryTab = 'momentos' | 'videos' | 'cartelera';
 type SelectedImage = { src: string; alt: string } | null;
 
 const tabs = [
-  { id: 'momentos', label: 'Momentos', icon: Camera },
   { id: 'videos', label: 'Videos', icon: Film },
-  { id: 'cartelera', label: 'Peleadores', icon: Images },
+  { id: 'momentos', label: 'Momentos', icon: Camera },
+  { id: 'cartelera', label: 'Pupilos', icon: Images },
 ] as const;
 
 export function EventMediaGallery() {
-  const [active, setActive] = useState<GalleryTab>('momentos');
+  const [active, setActive] = useState<GalleryTab>('videos');
   const [selected, setSelected] = useState<SelectedImage>(null);
 
   useEffect(() => {
@@ -133,7 +133,7 @@ export function EventMediaGallery() {
               />
               <span className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
               <span className="absolute bottom-4 right-4 rounded-full bg-black/70 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur">
-                Ver cartel
+                Ver ejemplo
               </span>
             </button>
           ))}

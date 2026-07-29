@@ -73,7 +73,12 @@ export default function ContactPage() {
                 text="@villanovaboxing"
                 href={SOCIAL.instagram}
               />
-              <ContactItem icon={MapPin} title="Ubicación" text="Villanova Boxing Gym" />
+              <ContactItem
+                icon={MapPin}
+                title="Ubicación"
+                text="Villanova Boxing Gym · Mazatlán"
+                href="#ubicacion"
+              />
               <ContactItem
                 icon={Clock3}
                 title="Horario"
@@ -157,6 +162,86 @@ export default function ContactPage() {
         </div>
       </section>
 
+      <section id="ubicacion" className="scroll-mt-24 border-t border-brand/15 bg-[#090909] py-20 sm:py-24">
+        <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
+          <div className="max-w-2xl">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-brand">
+              Ubicación
+            </p>
+            <h2 className="mt-4 font-display text-3xl font-semibold uppercase leading-none text-white sm:text-4xl">
+              Cómo llegar a <span className="text-gradient-brand">Villanova Boxing</span>
+            </h2>
+            <p className="mt-4 text-sm leading-relaxed text-zinc-400 sm:text-base">
+              Encuéntranos en el mapa, abre la ruta en Google Maps y visita el gym en Mazatlán,
+              Sinaloa.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-8 lg:grid-cols-[1.35fr_.85fr] lg:items-start">
+            <div className="overflow-hidden rounded-3xl border-[3px] border-brand/40 bg-[#111111]">
+              <iframe
+                title="Mapa de Villanova Boxing en Google Maps"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3665.3856281767935!2d-106.46767132496518!3d23.265433607222096!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8698ab112a158e97%3A0xdde6ba9d83f5448e!2sVillanova%20Boxing!5e0!3m2!1ses-419!2smx!4v1785345705064!5m2!1ses-419!2smx"
+                className="h-[320px] w-full border-0 sm:h-[420px] lg:h-[480px]"
+                loading="lazy"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              />
+            </div>
+
+            <aside className="space-y-5 rounded-3xl border-[3px] border-brand/40 bg-[#111111] p-6 sm:p-8">
+              <div>
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-brand">
+                  Dirección
+                </p>
+                <p className="mt-3 flex items-start gap-3 text-sm leading-relaxed text-zinc-300">
+                  <MapPin className="mt-0.5 size-4 shrink-0 text-brand" />
+                  <span>
+                    <span className="block font-semibold text-white">Villanova Boxing Gym</span>
+                    Mazatlán, Sinaloa, México
+                  </span>
+                </p>
+              </div>
+
+              <div>
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-brand">
+                  Cómo llegar
+                </p>
+                <ul className="mt-3 space-y-3 text-sm leading-relaxed text-zinc-400">
+                  <li>
+                    Usa Google Maps y busca <strong className="text-white">Villanova Boxing</strong>.
+                  </li>
+                  <li>Activa la navegación en auto, moto o transporte para la ruta más corta.</li>
+                  <li>Al llegar, pregunta por recepción para tu visita o clase de prueba.</li>
+                  <li>
+                    Horario: {gymHours.weekday} · {gymHours.saturday} · {gymHours.sunday}
+                  </li>
+                </ul>
+              </div>
+
+              <div className="flex flex-col gap-3 pt-2">
+                <a
+                  href="https://www.google.com/maps/dir/?api=1&destination=Villanova+Boxing&destination_place_id=ChIJl44VKxGruIYRjkT1g5265t0"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-brand px-5 py-3.5 text-xs font-black uppercase tracking-wider text-black hover:bg-brand-light"
+                >
+                  <MapPin className="size-4" /> Cómo llegar en Maps
+                </a>
+                <a
+                  href="https://www.google.com/maps/place/Villanova+Boxing/@23.2654336,-106.4676713,17z"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-brand/40 px-5 py-3.5 text-xs font-black uppercase tracking-wider text-white hover:border-brand hover:bg-brand/10"
+                >
+                  Abrir en Google Maps
+                </a>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
       {panel ? (
         <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/70 p-4 sm:items-center">
           <div className="w-full max-w-md rounded-3xl border-[3px] border-brand/40 bg-[#111111] p-6">
@@ -232,8 +317,13 @@ function ContactItem({
   );
 
   if (href) {
+    const external = href.startsWith('http');
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+      <a
+        href={href}
+        {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+        className={className}
+      >
         {content}
       </a>
     );
