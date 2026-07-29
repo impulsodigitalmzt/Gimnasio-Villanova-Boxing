@@ -8,8 +8,10 @@ import { AccountStatusCard } from '@/components/portal/account-status';
 import { ChallengeCard } from '@/components/portal/challenge-card';
 import { DailyWorkoutCard } from '@/components/portal/daily-workout';
 import { WelcomeProgressCard } from '@/components/portal/welcome-progress';
+import { DailyCheckInLockCard } from '@/components/portal/daily-checkin-lock';
 import { useMemberPortal } from '@/lib/portal/store';
 import { isMembershipCurrent } from '@/lib/portal/membership-access';
+import { useTodayCheckIn } from '@/lib/portal/daily-checkin';
 import { useTrainingProgress } from '@/lib/portal/training-progress';
 import { resolveMemberWorkout } from '@/lib/portal/training-data';
 import { todayClass } from '@/lib/portal/mock-data';
@@ -78,12 +80,18 @@ function MemberDashboardContent() {
   const showPlanPicker = searchParams.get('accion') === 'elegir-plan';
   const { ready, profile, challenges } = useMemberPortal();
   const training = useTrainingProgress();
+  const membershipOk = isMembershipCurrent(profile);
+  const checkIn = useTodayCheckIn({
+    memberId: profile?.id,
+    email: profile?.email,
+    enabled: membershipOk,
+  });
 
   const member = profile;
   const featured = challenges.filter((c) => !c.joined).slice(0, 3);
   const workout = resolveMemberWorkout({ dayClass: todayClass, challenges });
 
-  if (!ready || !training.ready) {
+  if (!ready || !training.ready || (membershipOk && !checkIn.ready)) {
     return <div className="py-20 text-center text-sm text-zinc-500">Cargando tu cuenta…</div>;
   }
 
@@ -98,7 +106,8 @@ function MemberDashboardContent() {
     );
   }
 
-  const current = isMembershipCurrent(member);
+  const current = membershipOk;
+  const trainingUnlocked = current && checkIn.checkedIn;
   const needsPlan =
     showPlanPicker || member.status === 'pendiente' || member.expiresAt === 'Pendiente de pago';
 
@@ -106,7 +115,7 @@ function MemberDashboardContent() {
     <div className="space-y-5">
       {needsPlan ? <PlanPicker /> : null}
 
-      {current ? (
+      {trainingUnlocked ? (
         <>
           <WelcomeProgressCard
             profile={member}
@@ -128,6 +137,22 @@ function MemberDashboardContent() {
             Ver rutina completa, calendario y registro
             <ArrowRight className="size-4" />
           </Link>
+        </>
+      ) : current ? (
+        <>
+          <header>
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--portal-brand-light)]">
+              Hola, {member.name.split(' ')[0]}
+            </p>
+            <h1 className="mt-1 font-display text-3xl font-black uppercase leading-none text-white">
+              Bienvenido de <span className="text-[var(--portal-brand)]">vuelta</span>
+            </h1>
+          </header>
+          <DailyCheckInLockCard
+            memberId={member.id}
+            email={member.email}
+            onConfirmed={checkIn.refresh}
+          />
         </>
       ) : (
         <>

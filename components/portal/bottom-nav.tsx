@@ -12,6 +12,7 @@ import {
   UserRound,
 } from 'lucide-react';
 import { isMembershipCurrent } from '@/lib/portal/membership-access';
+import { useTodayCheckIn } from '@/lib/portal/daily-checkin';
 import { useMemberPortal } from '@/lib/portal/store';
 
 /** Opciones de la barra principal del Portal (página Inicio y resto de /app). */
@@ -28,6 +29,12 @@ export function PortalBottomNav() {
   const pathname = usePathname();
   const { ready, profile } = useMemberPortal();
   const current = ready && isMembershipCurrent(profile);
+  const checkIn = useTodayCheckIn({
+    memberId: profile?.id,
+    email: profile?.email,
+    enabled: Boolean(current),
+  });
+  const trainingOpen = Boolean(current && checkIn.checkedIn);
 
   return (
     <nav
@@ -41,7 +48,7 @@ export function PortalBottomNav() {
           const Icon = tab.icon;
           const isShop = tab.href === '/app/tienda';
           const isQr = tab.href === '/app/qr';
-          const locked = tab.href === '/app/clases' && !current;
+          const locked = tab.href === '/app/clases' && !trainingOpen;
           return (
             <Link
               key={tab.href}
@@ -67,7 +74,11 @@ export function PortalBottomNav() {
                           : 'bg-white/5'
                 }`}
               >
-                {locked ? <LockKeyhole className="size-3.5 sm:size-4" /> : <Icon className="size-3.5 sm:size-4" />}
+                {locked ? (
+                  <LockKeyhole className="size-3.5 sm:size-4" />
+                ) : (
+                  <Icon className="size-3.5 sm:size-4" />
+                )}
               </span>
               {tab.label}
             </Link>

@@ -82,16 +82,13 @@ export function syncPortalUsersToAdmin(portalUsers: PortalUser[]) {
   const mapped = portalUsers.map(portalUserToAdminMember);
   const portalEmails = new Set(mapped.map((m) => m.email.toLowerCase()));
 
-  db.members = db.members.filter(
-    (m) =>
-      !m.id.startsWith(PORTAL_MEMBER_PREFIX) &&
-      !portalEmails.has(m.email.toLowerCase()),
-  );
-  db.pendingUsers = db.pendingUsers.filter(
-    (m) =>
-      !m.id.startsWith(PORTAL_MEMBER_PREFIX) &&
-      !portalEmails.has(m.email.toLowerCase()),
-  );
+  // Las altas provisionales por QR se conservan hasta que exista su usuario del portal.
+  const keep = (m: Member) =>
+    !portalEmails.has(m.email.toLowerCase()) &&
+    (m.unverifiedFromQr || !m.id.startsWith(PORTAL_MEMBER_PREFIX));
+
+  db.members = db.members.filter(keep);
+  db.pendingUsers = db.pendingUsers.filter(keep);
 
   for (const member of mapped) {
     if (member.status === 'pendiente') {

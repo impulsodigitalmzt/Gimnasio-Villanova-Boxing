@@ -40,7 +40,7 @@ export default function MemberQrPage() {
       </p>
 
       <div className="mt-8 rounded-[1.75rem] border-[3px] border-zinc-500 bg-white p-5 shadow-[0_0_40px_rgba(212,175,55,0.15)]">
-        <MemberCheckInQr
+          <MemberCheckInQr
           memberId={profile.id}
           email={profile.email}
           size={240}
@@ -54,6 +54,10 @@ export default function MemberQrPage() {
       </p>
       <p className="mt-1 text-center text-xs text-zinc-500">{profile.planName}</p>
       <p className="mt-1 font-mono text-[10px] text-zinc-600">{profile.id}</p>
+
+      <p className="mt-6 max-w-xs text-center text-xs text-zinc-500">
+        Después del check-in en recepción se desbloquean tu rutina y clases del día.
+      </p>
 
       <button
         type="button"

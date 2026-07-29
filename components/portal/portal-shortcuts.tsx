@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { LockKeyhole } from 'lucide-react';
 import { portalNavTabs } from '@/components/portal/bottom-nav';
 import { isMembershipCurrent } from '@/lib/portal/membership-access';
+import { useTodayCheckIn } from '@/lib/portal/daily-checkin';
 import { useMemberPortal } from '@/lib/portal/store';
 
 /** Atajos del portal — siempre visibles debajo del header. */
@@ -12,6 +13,12 @@ export function PortalShortcuts() {
   const pathname = usePathname();
   const { ready, profile } = useMemberPortal();
   const current = ready && isMembershipCurrent(profile);
+  const checkIn = useTodayCheckIn({
+    memberId: profile?.id,
+    email: profile?.email,
+    enabled: Boolean(current),
+  });
+  const trainingOpen = Boolean(current && checkIn.checkedIn);
   const shortcuts = portalNavTabs.filter((tab) => tab.href !== '/app');
 
   return (
@@ -23,7 +30,7 @@ export function PortalShortcuts() {
         {shortcuts.map((tab) => {
           const Icon = tab.icon;
           const active = pathname === tab.href || pathname.startsWith(`${tab.href}/`);
-          const locked = tab.href === '/app/clases' && !current;
+          const locked = tab.href === '/app/clases' && !trainingOpen;
           const highlightQr = tab.href === '/app/qr';
           return (
             <Link

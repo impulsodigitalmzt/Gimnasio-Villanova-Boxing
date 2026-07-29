@@ -265,6 +265,11 @@ export default function AsistenciaPage() {
                       <p className="text-xs text-zinc-500">
                         {c.planName || '—'} · {c.source === 'qr_scan' ? 'QR' : 'Manual'}
                       </p>
+                      {c.planName === 'Por confirmar' ? (
+                        <p className="text-[11px] font-semibold text-sky-700">
+                          Verificar plan en Socios
+                        </p>
+                      ) : null}
                     </div>
                   </div>
                   <p className="font-mono text-xs text-zinc-500">

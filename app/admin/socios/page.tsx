@@ -206,6 +206,14 @@ export default function SociosPage() {
                           Portal
                         </span>
                       ) : null}
+                      {member.unverifiedFromQr ? (
+                        <span
+                          className="ml-2 rounded-full bg-sky-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-sky-700"
+                          title="Alta creada al escanear su QR. Verifica plan y datos."
+                        >
+                          Alta por QR
+                        </span>
+                      ) : null}
                     </td>
                     <td className="px-5 py-3.5 text-zinc-500">
                       <span className="block">{member.email}</span>

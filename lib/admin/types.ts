@@ -33,6 +33,8 @@ export type Member = {
   checkInsThisMonth?: number;
   daysSinceLastVisit?: number;
   attendanceRisk?: MemberAttendanceRisk;
+  /** Alta creada al escanear un QR sin expediente en este dispositivo. */
+  unverifiedFromQr?: boolean;
 };
 
 export type TodayPackage = {

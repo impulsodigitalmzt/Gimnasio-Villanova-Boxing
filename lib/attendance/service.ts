@@ -84,6 +84,44 @@ function findMember(
   return null;
 }
 
+function nameFromEmail(email: string) {
+  const local = email.split('@')[0] || 'Alumno';
+  return local
+    .replace(/[._-]+/g, ' ')
+    .split(' ')
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+/**
+ * Alta provisional a partir del QR cuando el alumno no está en este dispositivo.
+ * Queda marcado para que recepción lo vincule con su expediente real.
+ */
+function createProvisionalMember(input: { memberId: string; email: string }): Member {
+  const member: Member = {
+    id: `portal_${input.memberId}`,
+    name: nameFromEmail(input.email),
+    email: input.email,
+    plan: 'Por confirmar',
+    expiresAt: '—',
+    status: 'pendiente',
+    registeredAt: new Date().toLocaleDateString('es-MX'),
+    unverifiedFromQr: true,
+  };
+
+  const db = readAdminDb();
+  const exists = db.members.some(
+    (m) => m.id === member.id || m.email.toLowerCase() === member.email.toLowerCase(),
+  );
+  if (!exists) {
+    db.members.unshift(member);
+    db.pendingUsers.unshift(member);
+    writeAdminDb(db);
+  }
+  return member;
+}
+
 function resolveFromPortal(user: PortalUser): {
   memberId: string;
   adminMemberId: string;
@@ -158,6 +196,22 @@ export async function recordCheckIn(input: {
           membershipStatus: member.status,
         }
       : null;
+
+  if (!identity && memberId && email) {
+    // El alumno se registró en otro dispositivo (demo sin BD compartida) o aún no
+    // está sincronizado: se da de alta provisional para no frenar la entrada.
+    const provisional = createProvisionalMember({ memberId, email });
+    member = provisional;
+    identity = {
+      memberId,
+      adminMemberId: provisional.id,
+      memberName: provisional.name,
+      memberEmail: provisional.email,
+      planId: provisional.planId,
+      planName: provisional.plan,
+      membershipStatus: provisional.status,
+    };
+  }
 
   if (!identity) {
     return {
