@@ -4,7 +4,7 @@ import { ArrowRight, HeartHandshake, Instagram, ShieldCheck, Sparkles, Trophy, U
 import { EventMediaGallery } from '@/components/event-media-gallery';
 import { PageHero } from '@/components/page-hero';
 import { SectionHeading } from '@/components/section-heading';
-import { oceanFightNight, eventVideos } from '@/lib/events-data';
+import { eventMoments, oceanFightNight } from '@/lib/events-data';
 import { SOCIAL } from '@/components/social-links';
 
 export const metadata: Metadata = {
@@ -41,8 +41,8 @@ export default function EventosPage() {
         image={oceanFightNight.hero}
         video={oceanFightNight.heroVideo}
         imagePosition="center"
-        primaryHref="#videos"
-        primaryLabel="Ver videos reales"
+        primaryHref="#momentos"
+        primaryLabel="Ver momentos reales"
       />
 
       <section className="border-b border-brand/20 bg-[#0c0c0c] py-8">
@@ -56,36 +56,33 @@ export default function EventosPage() {
         </div>
       </section>
 
-      <section id="videos" className="scroll-mt-24 bg-black py-20 sm:py-24">
+      <section id="momentos" className="scroll-mt-24 bg-black py-20 sm:py-24">
         <div className="mx-auto max-w-[1440px] px-5 sm:px-8">
           <SectionHeading
-            eyebrow="Videos de eventos especiales"
+            eyebrow="Momentos de eventos especiales"
             title={'LO QUE HACEMOS\n*CON NUESTROS PUPILOS.*'}
-            description="Una selección breve de acción en el ring que transmite la energía de las funciones Villanova."
+            description="Ring, público, esquina y comunidad: una selección visual de la energía que viven nuestros pupilos."
           />
 
-          <div className="mt-12 flex snap-x gap-4 overflow-x-auto pb-4 sm:grid sm:snap-none sm:grid-cols-2 sm:gap-5 sm:overflow-visible">
-            {eventVideos.map((item) => (
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {eventMoments.map((item) => (
               <article
                 key={item.src}
-                className="w-[72vw] shrink-0 snap-start overflow-hidden rounded-3xl border-[3px] border-brand/35 bg-[#111111] sm:w-auto sm:shrink"
+                className="group relative min-h-[19rem] overflow-hidden rounded-3xl border-[3px] border-brand/35 bg-[#111111] sm:min-h-[23rem]"
               >
-                <div className="relative aspect-[9/16] bg-black">
-                  <video
-                    src={item.src}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="auto"
-                    className="absolute inset-0 size-full object-cover"
-                  />
-                </div>
-                <div className="p-4">
-                  <h3 className="font-display text-base font-semibold uppercase leading-snug text-white sm:text-lg">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={item.src}
+                  alt={item.alt}
+                  loading="lazy"
+                  className="absolute inset-0 size-full object-cover transition duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
+                  <h3 className="font-display text-lg font-semibold uppercase leading-snug text-white sm:text-xl">
                     {item.title}
                   </h3>
-                  <p className="mt-2 text-xs leading-relaxed text-zinc-400 sm:text-sm">{item.copy}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-zinc-300">{item.copy}</p>
                 </div>
               </article>
             ))}
@@ -147,9 +144,9 @@ export default function EventosPage() {
       <section id="galeria" className="border-t border-brand/15 bg-black py-24">
         <div className="mx-auto max-w-[1440px] px-5 sm:px-8">
           <SectionHeading
-            eyebrow="Galería multimedia"
-            title={'MOMENTOS QUE\n*FORMAN CARÁCTER.*'}
-            description="Fotos, videos y rostros de alumnos que ya vivieron la experiencia. Todo esto es muestra de trabajo con pupilos, no cartelera comercial."
+            eyebrow="Archivo Villanova"
+            title={'ROSTROS E HISTORIAS\n*QUE SUBIERON AL RING.*'}
+            description="Una pasarela de pupilos, carteles y recuerdos de ediciones anteriores. Es archivo de nuestro trabajo, no una cartelera vigente."
           />
           <div className="mt-12">
             <EventMediaGallery />

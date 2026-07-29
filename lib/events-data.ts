@@ -94,20 +94,23 @@ export const eventPosters = [
   },
 ] as const;
 
-/** Selección corta: solo los clips con más energía de ring y ambiente. */
-export const eventVideos = [
+/** Fotografías no incluidas en la selección principal; se muestran en la pasarela final. */
+export const eventArchiveImages = [
+  ...eventPosters,
   {
-    src: eventVideo(
-      'AQM8CjVSNc5eDGFZGHnwzDFWZY5DJgsMn6PIvF9H2Fz2SPwdgLNz4oTrF-86xlVIPEs-CwZJYECXUqM0-Xirn7p0io_gAKT5ZyCzhyo.mp4',
-    ),
-    title: 'Pupilos en la arena',
-    copy: 'Función indoor: alumnos en ring, público real y atmósfera de competencia.',
+    src: eventPhoto('684163738_18089324933252708_1641134725515044083_n.jpg'),
+    alt: 'Cartel histórico de una función Ocean Fight Night',
   },
   {
-    src: eventVideo(
-      'AQOVvkewSX5KahkbqJHvo1eJ7zw75S-2k0XxU9LJyqyeI16YM707shPrDETLHzptehfXo2iZanjNgBgoUB_GCG-I6t6Y-vFk4CHjEcxLGg.mp4',
-    ),
-    title: 'Acción bajo las luces',
-    copy: 'Rounds reales: técnica, coraje y la esquina Villanova en cada pelea.',
+    src: eventPhoto('690139986_18090356111252708_974966273387521762_n.jpg'),
+    alt: 'Información de boletos de una edición anterior de Ocean Fight Night',
+  },
+  {
+    src: oceanFightNight.sponsors,
+    alt: 'Marcas y aliados de una edición anterior de Ocean Fight Night',
+  },
+  {
+    src: oceanFightNight.featuredPoster,
+    alt: 'Cartel histórico de Ocean Fight Night',
   },
 ] as const;
