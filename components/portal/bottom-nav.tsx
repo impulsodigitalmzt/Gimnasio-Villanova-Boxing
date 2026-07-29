@@ -6,6 +6,7 @@ import {
   Dumbbell,
   Home,
   LockKeyhole,
+  QrCode,
   ShoppingBag,
   Trophy,
   UserRound,
@@ -16,6 +17,7 @@ import { useMemberPortal } from '@/lib/portal/store';
 /** Opciones de la barra principal del Portal (página Inicio y resto de /app). */
 export const portalNavTabs = [
   { href: '/app', label: 'Inicio', icon: Home },
+  { href: '/app/qr', label: 'Mi QR', icon: QrCode },
   { href: '/app/clases', label: 'Clases', icon: Dumbbell },
   { href: '/app/tienda', label: 'Tienda', icon: ShoppingBag },
   { href: '/app/retos', label: 'Retos', icon: Trophy },
@@ -38,12 +40,13 @@ export function PortalBottomNav() {
             tab.href === '/app' ? pathname === '/app' : pathname.startsWith(tab.href);
           const Icon = tab.icon;
           const isShop = tab.href === '/app/tienda';
+          const isQr = tab.href === '/app/qr';
           const locked = tab.href === '/app/clases' && !current;
           return (
             <Link
               key={tab.href}
               href={tab.href}
-              className={`flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-2xl px-1 py-1.5 text-[9px] font-bold uppercase tracking-wider transition ${
+              className={`flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-2xl px-0.5 py-1.5 text-[8px] font-bold uppercase tracking-wider transition sm:text-[9px] ${
                 active
                   ? 'text-[var(--portal-brand-light)]'
                   : locked
@@ -52,17 +55,19 @@ export function PortalBottomNav() {
               }`}
             >
               <span
-                className={`flex size-9 items-center justify-center rounded-2xl ${
+                className={`flex size-8 items-center justify-center rounded-2xl sm:size-9 ${
                   active
                     ? 'bg-[var(--portal-brand)] text-white'
-                    : isShop
-                      ? 'bg-[var(--portal-brand)]/20 text-[var(--portal-brand-light)]'
-                      : locked
-                        ? 'bg-white/5 text-zinc-600'
-                        : 'bg-white/5'
+                    : isQr
+                      ? 'bg-[var(--portal-brand)]/25 text-[var(--portal-brand-light)]'
+                      : isShop
+                        ? 'bg-[var(--portal-brand)]/20 text-[var(--portal-brand-light)]'
+                        : locked
+                          ? 'bg-white/5 text-zinc-600'
+                          : 'bg-white/5'
                 }`}
               >
-                {locked ? <LockKeyhole className="size-4" /> : <Icon className="size-4" />}
+                {locked ? <LockKeyhole className="size-3.5 sm:size-4" /> : <Icon className="size-3.5 sm:size-4" />}
               </span>
               {tab.label}
             </Link>

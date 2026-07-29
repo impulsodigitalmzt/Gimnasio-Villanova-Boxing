@@ -5,7 +5,6 @@ import { FormEvent, useEffect, useState } from 'react';
 import { LogOut, Save } from 'lucide-react';
 import { AccountStatusCard } from '@/components/portal/account-status';
 import { PlanBenefitsCard } from '@/components/portal/plan-benefits';
-import { MemberCheckInQr } from '@/components/attendance/member-checkin-qr';
 import { useMemberPortal } from '@/lib/portal/store';
 import { isMembershipCurrent } from '@/lib/portal/membership-access';
 import { membershipRenewalPrice } from '@/lib/portal/mock-data';
@@ -17,11 +16,6 @@ import {
   daysUntilExpiry,
   EXPIRY_REMINDER_DAYS,
 } from '@/lib/portal/membership-lifecycle';
-import {
-  createDigitalPass,
-  loadDigitalPass,
-  saveDigitalPass,
-} from '@/lib/digital-pass';
 
 export default function MemberAccountPage() {
   const { ready, profile, persistProfile } = useMemberPortal();
@@ -112,33 +106,15 @@ export default function MemberAccountPage() {
           Tu QR de entrada
         </h2>
         <p className="mt-2 text-sm text-zinc-400">
-          Muéstralo en recepción. El teléfono del gym lo escanea y queda registrado en el CRM.
+          Ábrelo en un toque desde el menú <span className="text-white">Mi QR</span> al llegar al
+          gym.
         </p>
-        <div className="mt-5 flex justify-center">
-          <MemberCheckInQr memberId={profile.id} email={profile.email} size={200} />
-        </div>
-        <button
-          type="button"
-          className="mt-5 w-full rounded-2xl border border-white/15 py-3 text-[10px] font-black uppercase tracking-wider text-zinc-300 hover:border-brand hover:text-white"
-          onClick={() => {
-            const existing = loadDigitalPass();
-            const next = createDigitalPass({
-              name: profile.name,
-              email: profile.email,
-              phone: profile.phone,
-              planId: profile.planId,
-              memberId: existing?.memberId,
-              portalUserId: profile.id,
-            });
-            // Mantener vigencia del portal si está activa
-            if (profile.expiresAt && profile.expiresAt !== 'Pendiente de pago') {
-              next.expiresAt = profile.expiresAt;
-            }
-            saveDigitalPass(next);
-          }}
+        <Link
+          href="/app/qr"
+          className="mt-5 flex w-full justify-center rounded-2xl bg-[var(--portal-brand)] py-3.5 text-xs font-black uppercase tracking-wider text-white hover:bg-[var(--portal-brand-dark)]"
         >
-          Guardar también en pase digital
-        </button>
+          Abrir Mi QR
+        </Link>
       </section>
 
       {isMembershipCurrent(profile) ? <PlanBenefitsCard profile={profile} /> : null}
