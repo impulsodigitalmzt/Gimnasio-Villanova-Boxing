@@ -40,6 +40,7 @@ export default function EventosPage() {
         description="Estas noches no son anuncios de boletos ni carteleras comerciales. Son ejemplos reales de lo que Villanova hace con sus pupilos: darles un escenario para crecer frente a Mazatlán."
         image={oceanFightNight.hero}
         video={oceanFightNight.heroVideo}
+        mediaOverlay={false}
         imagePosition="center"
         primaryHref="#momentos"
         primaryLabel="Ver momentos reales"

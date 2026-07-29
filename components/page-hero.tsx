@@ -10,6 +10,7 @@ type PageHeroProps = {
   description: string;
   image?: string;
   video?: string;
+  mediaOverlay?: boolean;
   /** Punto focal de la imagen (object-position) para evitar cortar caras. */
   imagePosition?: string;
   primaryHref?: string;
@@ -22,6 +23,7 @@ export function PageHero({
   description,
   image,
   video,
+  mediaOverlay = true,
   imagePosition = 'center',
   primaryHref = '/app/login',
   primaryLabel = 'Acceso alumnos',
@@ -52,7 +54,9 @@ export function PageHero({
               aria-hidden="true"
             />
           ) : null}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/5" />
+          {mediaOverlay ? (
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/5" />
+          ) : null}
         </>
       )}
       {!image && !video && (
