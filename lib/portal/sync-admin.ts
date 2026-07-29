@@ -1,12 +1,13 @@
 /**
  * Sincroniza socios del Portal con el panel administrativo.
- * Mismo origen de verdad en PC y móvil del mismo navegador.
+ * Incluye plan, retos adquiridos y snapshot de entrenamiento.
  */
 
 import type { AdminDatabase, Member, MemberStatus } from '@/lib/admin/types';
 import { createSeedDatabase } from '@/lib/admin/types';
 import type { PortalUser } from '@/lib/portal/users';
 import { resolveAdminStatusFromExpiry } from '@/lib/portal/membership-lifecycle';
+import { activeChallenges } from '@/lib/portal/mock-data';
 
 export const ADMIN_DB_STORAGE_KEY = 'villanova-admin-db-v6';
 const PORTAL_MEMBER_PREFIX = 'portal_';
@@ -15,16 +16,36 @@ function portalStatusToAdmin(user: PortalUser): MemberStatus {
   return resolveAdminStatusFromExpiry(user.expiresAt, user.status);
 }
 
+function challengeTitlesFor(ids: string[] | undefined) {
+  if (!ids?.length) return [];
+  return ids
+    .map((id) => activeChallenges.find((c) => c.id === id)?.title || id)
+    .filter(Boolean);
+}
+
 export function portalUserToAdminMember(user: PortalUser): Member {
+  const challengeIds = user.challengeIds || [];
   return {
     id: `${PORTAL_MEMBER_PREFIX}${user.id}`,
     name: user.name,
     email: user.email,
     plan: user.planName,
+    planId: user.planId,
     expiresAt: user.status === 'pendiente' ? '—' : user.expiresAt,
     status: portalStatusToAdmin(user),
     registeredAt: user.memberSince,
     phone: user.phone,
+    amountPaid: user.amountPaid,
+    activatedAt: user.activatedAt,
+    challengeIds,
+    challengeTitles: challengeTitlesFor(challengeIds),
+    trainingLevel: user.trainingLevel,
+    primaryClassName: user.primaryClassName,
+    lastWorkoutTitle: user.lastWorkoutTitle,
+    sessionsThisWeek: user.sessionsThisWeek,
+    streakDays: user.streakDays,
+    completedSessionsCount: user.completedSessionsCount,
+    trainingUpdatedAt: user.trainingUpdatedAt,
   };
 }
 
@@ -42,7 +63,6 @@ function readAdminDb(): AdminDatabase {
 
 function writeAdminDb(db: AdminDatabase) {
   window.localStorage.setItem(ADMIN_DB_STORAGE_KEY, JSON.stringify(db));
-  // Notifica al store en memoria del Admin si está montado
   window.dispatchEvent(new CustomEvent('villanova-admin-db-updated'));
 }
 
@@ -58,7 +78,6 @@ export function syncPortalUsersToAdmin(portalUsers: PortalUser[]) {
   const mapped = portalUsers.map(portalUserToAdminMember);
   const portalEmails = new Set(mapped.map((m) => m.email.toLowerCase()));
 
-  // Quita entradas previas del portal y duplicados por email
   db.members = db.members.filter(
     (m) =>
       !m.id.startsWith(PORTAL_MEMBER_PREFIX) &&
@@ -74,7 +93,6 @@ export function syncPortalUsersToAdmin(portalUsers: PortalUser[]) {
     if (member.status === 'pendiente') {
       db.pendingUsers.unshift(member);
     }
-    // Todos los registros del portal aparecen en el listado de socios
     db.members.unshift(member);
   }
 

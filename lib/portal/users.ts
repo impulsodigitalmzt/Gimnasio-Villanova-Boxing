@@ -49,6 +49,17 @@ export type PortalUser = {
   expiresAt: string;
   memberSince: string;
   authProvider?: 'email' | 'google';
+  /** Retos adquiridos / inscritos (ids del catálogo). */
+  challengeIds?: string[];
+  /** Nivel de entrenamiento declarado en el portal. */
+  trainingLevel?: 'principiante' | 'intermedio' | 'avanzado';
+  /** Snapshot de seguimiento para el CRM. */
+  primaryClassName?: string;
+  lastWorkoutTitle?: string;
+  sessionsThisWeek?: number;
+  streakDays?: number;
+  completedSessionsCount?: number;
+  trainingUpdatedAt?: string;
 };
 
 /**
@@ -77,6 +88,14 @@ export const seedUsers: PortalUser[] = [
     expiresAt: '15/08/2026',
     memberSince: '03/02/2026',
     authProvider: 'email',
+    challengeIds: ['reto-30-dias'],
+    trainingLevel: 'intermedio',
+    primaryClassName: 'Técnica Base',
+    lastWorkoutTitle: 'Rutina de Técnica Base',
+    sessionsThisWeek: 2,
+    streakDays: 2,
+    completedSessionsCount: 8,
+    trainingUpdatedAt: '2026-07-29T12:00:00.000Z',
   },
 ];
 
@@ -310,6 +329,52 @@ export function updatePortalUserProfile(
   users[index] = next;
   saveUsers(users);
   setCurrentUserId(next.id);
+  return next;
+}
+
+/** Inscribe al alumno en un reto y lo refleja en el CRM. */
+export function enrollPortalUserChallenge(
+  userId: string,
+  challengeId: string,
+): PortalUser | null {
+  const users = loadUsers();
+  const index = users.findIndex((u) => u.id === userId);
+  if (index < 0) return null;
+  const current = users[index];
+  const ids = new Set(current.challengeIds || []);
+  ids.add(challengeId);
+  const next: PortalUser = {
+    ...current,
+    challengeIds: [...ids],
+    trainingUpdatedAt: new Date().toISOString(),
+  };
+  users[index] = next;
+  saveUsers(users);
+  return next;
+}
+
+/** Actualiza el snapshot de entrenamiento para seguimiento CRM. */
+export function updatePortalUserTraining(
+  userId: string,
+  patch: {
+    trainingLevel?: PortalUser['trainingLevel'];
+    primaryClassName?: string;
+    lastWorkoutTitle?: string;
+    sessionsThisWeek?: number;
+    streakDays?: number;
+    completedSessionsCount?: number;
+  },
+): PortalUser | null {
+  const users = loadUsers();
+  const index = users.findIndex((u) => u.id === userId);
+  if (index < 0) return null;
+  const next: PortalUser = {
+    ...users[index],
+    ...patch,
+    trainingUpdatedAt: new Date().toISOString(),
+  };
+  users[index] = next;
+  saveUsers(users);
   return next;
 }
 

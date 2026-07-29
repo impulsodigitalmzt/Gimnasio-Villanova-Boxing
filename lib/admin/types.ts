@@ -1,14 +1,31 @@
 export type MemberStatus = 'activo' | 'por_vencer' | 'vencido' | 'pendiente';
 
+export type MemberTrainingLevel = 'principiante' | 'intermedio' | 'avanzado';
+
 export type Member = {
   id: string;
   name: string;
   email: string;
   plan: string;
+  /** Id del plan del portal (individual / duo / grupal). */
+  planId?: string;
   expiresAt: string;
   status: MemberStatus;
   registeredAt?: string;
   phone?: string;
+  amountPaid?: number;
+  activatedAt?: string;
+  /** Retos contratados / inscritos. */
+  challengeIds?: string[];
+  challengeTitles?: string[];
+  trainingLevel?: MemberTrainingLevel;
+  /** Última clase / rutina de box asignada. */
+  primaryClassName?: string;
+  lastWorkoutTitle?: string;
+  sessionsThisWeek?: number;
+  streakDays?: number;
+  completedSessionsCount?: number;
+  trainingUpdatedAt?: string;
 };
 
 export type TodayPackage = {

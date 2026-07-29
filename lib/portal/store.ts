@@ -7,7 +7,9 @@ import {
   createDemoMember,
 } from '@/lib/portal/mock-data';
 import {
+  enrollPortalUserChallenge,
   getCurrentUser,
+  getCurrentUserId,
   loadUsers,
   membershipToPortalStatus,
   saveUsers,
@@ -17,21 +19,34 @@ import {
 import { restoreSessionFromLocalStorage, persistMemberSession } from '@/lib/portal/auth-session';
 import { getSubscriptionPlan } from '@/lib/portal/subscription-plans';
 
-const CHALLENGES_KEY = 'villanova_member_challenges_v2';
+const CHALLENGES_KEY = 'villanova_member_challenges_v3';
 
-function loadChallenges(): Challenge[] {
-  if (typeof window === 'undefined') return seedChallenges;
+type ChallengesByUser = Record<string, string[]>;
+
+function readChallengeMap(): ChallengesByUser {
+  if (typeof window === 'undefined') return {};
   try {
     const raw = window.localStorage.getItem(CHALLENGES_KEY);
-    if (!raw) return seedChallenges;
-    const parsed = JSON.parse(raw) as Challenge[];
-    const seedIds = seedChallenges.map((c) => c.id).join(',');
-    const storedIds = parsed.map((c) => c.id).join(',');
-    if (seedIds !== storedIds) return seedChallenges;
-    return parsed;
+    if (!raw) return {};
+    return JSON.parse(raw) as ChallengesByUser;
   } catch {
-    return seedChallenges;
+    return {};
   }
+}
+
+function writeChallengeMap(map: ChallengesByUser) {
+  window.localStorage.setItem(CHALLENGES_KEY, JSON.stringify(map));
+}
+
+/** Catálogo de retos con `joined` según el alumno actual (CRM + local). */
+function loadChallengesForUser(userId: string | null): Challenge[] {
+  const fromUser = userId ? getCurrentUser()?.challengeIds || [] : [];
+  const fromMap = userId ? readChallengeMap()[userId] || [] : [];
+  const joinedIds = new Set([...fromUser, ...fromMap]);
+  return seedChallenges.map((item) => ({
+    ...item,
+    joined: joinedIds.has(item.id),
+  }));
 }
 
 function resolveProfile(): MemberProfile | null {
@@ -54,32 +69,36 @@ export function useMemberPortal() {
   const [challenges, setChallenges] = useState<Challenge[]>(seedChallenges);
   const [ready, setReady] = useState(false);
 
+  const refresh = useCallback(() => {
+    const nextProfile = resolveProfile();
+    setProfile(nextProfile);
+    setChallenges(loadChallengesForUser(nextProfile?.id || getCurrentUserId()));
+  }, []);
+
   useEffect(() => {
-    setProfile(resolveProfile());
-    setChallenges(loadChallenges());
+    refresh();
     setReady(true);
 
     const onStorage = (event: StorageEvent) => {
       if (
         event.key === MEMBER_PROFILE_KEY ||
         event.key === 'villanova_portal_users_v1' ||
-        event.key === 'villanova_portal_current_user_id'
+        event.key === 'villanova_portal_current_user_id' ||
+        event.key === CHALLENGES_KEY
       ) {
-        setProfile(resolveProfile());
+        refresh();
       }
     };
 
-    const onCustom = () => setProfile(resolveProfile());
-
     window.addEventListener('storage', onStorage);
-    window.addEventListener('villanova-member-session', onCustom);
-    window.addEventListener('villanova-portal-users-updated', onCustom);
+    window.addEventListener('villanova-member-session', refresh);
+    window.addEventListener('villanova-portal-users-updated', refresh);
     return () => {
       window.removeEventListener('storage', onStorage);
-      window.removeEventListener('villanova-member-session', onCustom);
-      window.removeEventListener('villanova-portal-users-updated', onCustom);
+      window.removeEventListener('villanova-member-session', refresh);
+      window.removeEventListener('villanova-portal-users-updated', refresh);
     };
-  }, []);
+  }, [refresh]);
 
   const persistProfile = useCallback((next: MemberProfile) => {
     window.localStorage.setItem(MEMBER_PROFILE_KEY, JSON.stringify(next));
@@ -130,13 +149,22 @@ export function useMemberPortal() {
     persistProfile({ ...base, status: 'activa', expiresAt: '15/08/2026' });
   }, [persistProfile]);
 
-  const joinChallenge = useCallback((id: string) => {
-    const next = loadChallenges().map((item) =>
-      item.id === id ? { ...item, joined: true } : item,
-    );
-    window.localStorage.setItem(CHALLENGES_KEY, JSON.stringify(next));
-    setChallenges(next);
-  }, []);
+  const joinChallenge = useCallback(
+    (id: string) => {
+      const userId = getCurrentUserId() || profile?.id;
+      if (!userId) return;
+
+      const map = readChallengeMap();
+      const current = new Set(map[userId] || []);
+      current.add(id);
+      map[userId] = [...current];
+      writeChallengeMap(map);
+
+      enrollPortalUserChallenge(userId, id);
+      setChallenges(loadChallengesForUser(userId));
+    },
+    [profile?.id],
+  );
 
   return {
     ready,

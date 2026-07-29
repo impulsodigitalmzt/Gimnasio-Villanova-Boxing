@@ -37,7 +37,9 @@ export default function SociosPage() {
         m.name.toLowerCase().includes(q) ||
         m.email.toLowerCase().includes(q) ||
         m.plan.toLowerCase().includes(q) ||
-        (m.phone ?? '').toLowerCase().includes(q),
+        (m.phone ?? '').toLowerCase().includes(q) ||
+        (m.primaryClassName ?? '').toLowerCase().includes(q) ||
+        (m.challengeTitles ?? []).some((t) => t.toLowerCase().includes(q)),
     );
   }, [db.members, query]);
 
@@ -56,7 +58,7 @@ export default function SociosPage() {
     <div>
       <PageHeader
         title="Socios"
-        subtitle="Flujo operativo: prospecto → pago → alumno activo · vigencia 30 días · avisos automáticos"
+        subtitle="Prospecto → pago → alumno activo · seguimiento de plan, retos y rutina de box"
       />
 
       <div className="space-y-6 p-5 sm:p-8">
@@ -65,7 +67,7 @@ export default function SociosPage() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar por nombre, correo, WhatsApp o plan..."
+            placeholder="Buscar por nombre, plan, clase, reto o WhatsApp..."
             className="w-full rounded-xl border border-zinc-200 bg-white py-3.5 pl-11 pr-4 text-sm text-zinc-700 outline-none focus:border-[var(--admin-brand)]"
           />
         </label>
@@ -153,16 +155,19 @@ export default function SociosPage() {
           <header className="border-b border-zinc-100 px-5 py-4">
             <h2 className="text-sm font-bold text-zinc-800">Listado de socios</h2>
             <p className="text-xs text-zinc-500">
-              Estado calculado por fecha de corte (activo / por vencer / vencido)
+              Seguimiento por plan, retos adquiridos, clase de box y progreso de entrenamiento
             </p>
           </header>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[860px] text-left text-sm">
+            <table className="w-full min-w-[1100px] text-left text-sm">
               <thead className="bg-zinc-50 text-xs uppercase text-zinc-500">
                 <tr>
                   <th className="px-5 py-3 font-semibold">Nombre</th>
                   <th className="px-5 py-3 font-semibold">Contacto</th>
                   <th className="px-5 py-3 font-semibold">Plan</th>
+                  <th className="px-5 py-3 font-semibold">Entrenamiento</th>
+                  <th className="px-5 py-3 font-semibold">Retos</th>
+                  <th className="px-5 py-3 font-semibold">Progreso</th>
                   <th className="px-5 py-3 font-semibold">Vence</th>
                   <th className="px-5 py-3 font-semibold">Estado</th>
                 </tr>
@@ -184,7 +189,59 @@ export default function SociosPage() {
                         <span className="mt-0.5 block text-xs text-zinc-400">WA {member.phone}</span>
                       ) : null}
                     </td>
-                    <td className="px-5 py-3.5 text-zinc-700">{member.plan}</td>
+                    <td className="px-5 py-3.5 text-zinc-700">
+                      <span className="block font-medium">{member.plan}</span>
+                      {member.planId ? (
+                        <span className="mt-0.5 block font-mono text-[10px] text-zinc-400">
+                          {member.planId}
+                        </span>
+                      ) : null}
+                    </td>
+                    <td className="px-5 py-3.5 text-zinc-700">
+                      {member.primaryClassName || member.lastWorkoutTitle ? (
+                        <>
+                          <span className="block font-medium">
+                            {member.primaryClassName || '—'}
+                          </span>
+                          {member.lastWorkoutTitle ? (
+                            <span className="mt-0.5 block text-xs text-zinc-400">
+                              {member.lastWorkoutTitle}
+                            </span>
+                          ) : null}
+                          {member.trainingLevel ? (
+                            <span className="mt-1 inline-block rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-zinc-600">
+                              {member.trainingLevel}
+                            </span>
+                          ) : null}
+                        </>
+                      ) : (
+                        <span className="text-zinc-400">Sin rutina aún</span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3.5 text-zinc-600">
+                      {member.challengeTitles && member.challengeTitles.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {member.challengeTitles.map((title) => (
+                            <span
+                              key={title}
+                              className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-700"
+                            >
+                              {title}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-zinc-400">—</span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3.5 text-zinc-600">
+                      <span className="block text-xs">
+                        Semana: {member.sessionsThisWeek ?? 0} ses.
+                      </span>
+                      <span className="mt-0.5 block text-xs text-zinc-400">
+                        Racha {member.streakDays ?? 0} · Total {member.completedSessionsCount ?? 0}
+                      </span>
+                    </td>
                     <td className="px-5 py-3.5 text-zinc-500">{member.expiresAt}</td>
                     <td className="px-5 py-3.5">
                       <button
