@@ -6,18 +6,97 @@ import { eventArchiveImages } from '@/lib/events-data';
 
 type SelectedImage = { src: string; alt: string } | null;
 
+const AUTO_SPEED = 0.55;
+const RESUME_DELAY_MS = 2200;
+
 /**
- * Pasarela horizontal del archivo histórico. Conserva las tarjetas grandes en
- * móvil, permite arrastrar y suma controles visibles en pantallas amplias.
+ * Pasarela automática del archivo histórico.
+ * Avanza sola; se puede arrastrar con mouse/dedo, usar flechas y abrir imágenes.
  */
 export function EventMediaGallery() {
   const trackRef = useRef<HTMLDivElement>(null);
   const [selected, setSelected] = useState<SelectedImage>(null);
+  const pausedRef = useRef(false);
+  const resumeTimerRef = useRef<number | null>(null);
+  const dragRef = useRef<{
+    active: boolean;
+    startX: number;
+    startScroll: number;
+    moved: boolean;
+  }>({ active: false, startX: 0, startScroll: 0, moved: false });
+
+  const loopImages = [...eventArchiveImages, ...eventArchiveImages];
+
+  const pauseAuto = () => {
+    pausedRef.current = true;
+    if (resumeTimerRef.current) {
+      window.clearTimeout(resumeTimerRef.current);
+      resumeTimerRef.current = null;
+    }
+  };
+
+  const resumeAutoSoon = () => {
+    if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
+    resumeTimerRef.current = window.setTimeout(() => {
+      pausedRef.current = false;
+      resumeTimerRef.current = null;
+    }, RESUME_DELAY_MS);
+  };
+
+  const normalizeLoop = (track: HTMLDivElement) => {
+    const half = track.scrollWidth / 2;
+    if (half <= 0) return;
+    if (track.scrollLeft >= half) {
+      track.scrollLeft -= half;
+    } else if (track.scrollLeft <= 0) {
+      track.scrollLeft += half;
+    }
+  };
+
+  const move = (direction: -1 | 1) => {
+    const track = trackRef.current;
+    if (!track) return;
+    pauseAuto();
+    track.scrollBy({
+      left: direction * Math.min(track.clientWidth * 0.8, 620),
+      behavior: 'smooth',
+    });
+    window.setTimeout(() => normalizeLoop(track), 420);
+    resumeAutoSoon();
+  };
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    // Arranca a mitad del primer set para permitir scroll en ambos sentidos.
+    const start = () => {
+      const half = track.scrollWidth / 2;
+      if (half > 0) track.scrollLeft = 0;
+    };
+    start();
+
+    let frame = 0;
+    const tick = () => {
+      if (!pausedRef.current && !selected && !dragRef.current.active) {
+        track.scrollLeft += AUTO_SPEED;
+        normalizeLoop(track);
+      }
+      frame = window.requestAnimationFrame(tick);
+    };
+    frame = window.requestAnimationFrame(tick);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
+    };
+  }, [selected]);
 
   useEffect(() => {
     if (!selected) return;
     const previous = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    pauseAuto();
 
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setSelected(null);
@@ -27,13 +106,47 @@ export function EventMediaGallery() {
     return () => {
       document.body.style.overflow = previous;
       window.removeEventListener('keydown', closeOnEscape);
+      resumeAutoSoon();
     };
   }, [selected]);
 
-  const move = (direction: -1 | 1) => {
+  const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     const track = trackRef.current;
     if (!track) return;
-    track.scrollBy({ left: direction * Math.min(track.clientWidth * 0.8, 620), behavior: 'smooth' });
+    // Solo botones principales / touch
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+
+    pauseAuto();
+    dragRef.current = {
+      active: true,
+      startX: event.clientX,
+      startScroll: track.scrollLeft,
+      moved: false,
+    };
+    track.setPointerCapture(event.pointerId);
+  };
+
+  const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const track = trackRef.current;
+    const drag = dragRef.current;
+    if (!track || !drag.active) return;
+
+    const delta = event.clientX - drag.startX;
+    if (Math.abs(delta) > 6) drag.moved = true;
+    track.scrollLeft = drag.startScroll - delta;
+    normalizeLoop(track);
+  };
+
+  const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    const track = trackRef.current;
+    if (!track || !dragRef.current.active) return;
+    dragRef.current.active = false;
+    try {
+      track.releasePointerCapture(event.pointerId);
+    } catch {
+      // Ya liberado
+    }
+    resumeAutoSoon();
   };
 
   return (
@@ -59,24 +172,38 @@ export function EventMediaGallery() {
 
       <div
         ref={trackRef}
-        className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex cursor-grab gap-4 overflow-x-auto pb-5 active:cursor-grabbing [scrollbar-width:none] [&::-webkit-scrollbar]:hidden touch-pan-y"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onWheel={() => {
+          pauseAuto();
+          resumeAutoSoon();
+        }}
+        role="region"
+        aria-label="Pasarela de imágenes del archivo Villanova"
       >
-        {eventArchiveImages.map((item) => (
+        {loopImages.map((item, index) => (
           <button
-            key={item.src}
+            key={`${item.src}-${index}`}
             type="button"
-            onClick={() => setSelected(item)}
-            className="group relative aspect-[3/4] w-[68vw] max-w-[18rem] shrink-0 snap-start overflow-hidden rounded-3xl border-[3px] border-brand/35 bg-zinc-900 text-left sm:w-[17rem]"
+            onClick={() => {
+              if (dragRef.current.moved) return;
+              setSelected(item);
+            }}
+            className="group relative aspect-[3/4] w-[68vw] max-w-[18rem] shrink-0 overflow-hidden rounded-3xl border-[3px] border-brand/35 bg-zinc-900 text-left sm:w-[17rem]"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={item.src}
               alt={item.alt}
               loading="lazy"
-              className="absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-105"
+              draggable={false}
+              className="pointer-events-none absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-105"
             />
-            <span className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-            <span className="absolute inset-x-4 bottom-4 text-[10px] font-bold uppercase tracking-wider text-white">
+            <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            <span className="pointer-events-none absolute inset-x-4 bottom-4 text-[10px] font-bold uppercase tracking-wider text-white">
               Ver imagen
             </span>
           </button>
