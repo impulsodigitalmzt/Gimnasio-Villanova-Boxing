@@ -112,6 +112,7 @@ export function GoogleSignInButton({
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [gsiReady, setGsiReady] = useState(false);
+  const [gsiFailed, setGsiFailed] = useState(false);
   const gsiButtonRef = useRef<HTMLDivElement>(null);
 
   const finishWithAccount = useCallback(
@@ -175,13 +176,20 @@ export function GoogleSignInButton({
         }
         setGsiReady(true);
       } catch {
-        setGsiReady(false);
+        setGsiFailed(true);
       }
     };
 
     void setup();
+
+    // Si Google no dibuja su botón, se habilita el acceso alterno.
+    const guard = window.setTimeout(() => {
+      if (!cancelled && !gsiButtonRef.current?.childElementCount) setGsiFailed(true);
+    }, 3500);
+
     return () => {
       cancelled = true;
+      window.clearTimeout(guard);
     };
   }, [finishWithAccount, onError]);
 
@@ -208,27 +216,35 @@ export function GoogleSignInButton({
     });
   }
 
-  if (GOOGLE_CLIENT_ID) {
-    return (
-      <div className="space-y-2">
-        <div ref={gsiButtonRef} className="flex justify-center [&>div]:!w-full" />
-        {!gsiReady ? (
-          <p className="text-center text-[11px] text-zinc-500">Cargando acceso con Google…</p>
-        ) : null}
-      </div>
-    );
-  }
-
   return (
     <>
-      <button
-        type="button"
-        onClick={openChooser}
-        className="flex w-full items-center justify-center gap-3 rounded-2xl border border-white/20 bg-white py-3.5 text-sm font-semibold text-zinc-800 transition hover:bg-zinc-100"
-      >
-        <GoogleLogo className="size-5" />
-        Continuar con Google
-      </button>
+      {GOOGLE_CLIENT_ID ? (
+        <div className="space-y-2">
+          <div ref={gsiButtonRef} className="flex justify-center [&>div]:!w-full" />
+          {!gsiReady && !gsiFailed ? (
+            <p className="text-center text-[11px] text-zinc-500">Cargando acceso con Google…</p>
+          ) : null}
+          {gsiFailed ? (
+            <button
+              type="button"
+              onClick={openChooser}
+              className="flex w-full items-center justify-center gap-3 rounded-2xl border border-white/20 bg-white py-3.5 text-sm font-semibold text-zinc-800 transition hover:bg-zinc-100"
+            >
+              <GoogleLogo className="size-5" />
+              Continuar con Google
+            </button>
+          ) : null}
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={openChooser}
+          className="flex w-full items-center justify-center gap-3 rounded-2xl border border-white/20 bg-white py-3.5 text-sm font-semibold text-zinc-800 transition hover:bg-zinc-100"
+        >
+          <GoogleLogo className="size-5" />
+          Continuar con Google
+        </button>
+      )}
 
       {open ? (
         <div className="fixed inset-0 z-[90] flex items-end justify-center bg-black/70 p-4 sm:items-center">

@@ -77,6 +77,31 @@ export function accountFromGoogleCredential(credential: string): GoogleAccountOp
   }
 }
 
+type GoogleIdApi = {
+  accounts?: {
+    id?: {
+      disableAutoSelect?: () => void;
+      cancel?: () => void;
+    };
+  };
+};
+
+/**
+ * Cierra el estado de Google Identity Services al salir.
+ * Sin esto, Google conserva la sesión seleccionada y su botón deja de
+ * emitir credenciales en el siguiente intento de acceso.
+ */
+export function endGoogleIdentitySession() {
+  if (typeof window === 'undefined') return;
+  const api = (window as unknown as { google?: GoogleIdApi }).google;
+  try {
+    api?.accounts?.id?.cancel?.();
+    api?.accounts?.id?.disableAutoSelect?.();
+  } catch {
+    // Google no está cargado: no hay estado que limpiar
+  }
+}
+
 /** Cuentas de Google ya usadas en este dispositivo. */
 export function knownGoogleAccounts(): GoogleAccountOption[] {
   return loadUsers()

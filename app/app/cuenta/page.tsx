@@ -2,14 +2,13 @@
 
 import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { LogOut, Save } from 'lucide-react';
 import { AccountStatusCard } from '@/components/portal/account-status';
 import { useMemberPortal } from '@/lib/portal/store';
 import { membershipRenewalPrice } from '@/lib/portal/mock-data';
 import { buildMembershipPayUrl } from '@/lib/portal/payments';
 import { clearMemberSession, persistMemberSession } from '@/lib/portal/auth-session';
-import { memberInitials } from '@/lib/portal/google-auth';
+import { endGoogleIdentitySession, memberInitials } from '@/lib/portal/google-auth';
 import { getCurrentUser, updatePortalUserProfile } from '@/lib/portal/users';
 import {
   daysUntilExpiry,
@@ -17,7 +16,6 @@ import {
 } from '@/lib/portal/membership-lifecycle';
 
 export default function MemberAccountPage() {
-  const router = useRouter();
   const { ready, profile, persistProfile } = useMemberPortal();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -52,10 +50,15 @@ export default function MemberAccountPage() {
     (daysLeft !== null && daysLeft <= EXPIRY_REMINDER_DAYS);
 
   async function logout() {
+    endGoogleIdentitySession();
     clearMemberSession();
-    await fetch('/api/member/logout', { method: 'POST' });
-    router.push('/app/login');
-    router.refresh();
+    try {
+      await fetch('/api/member/logout', { method: 'POST' });
+    } catch {
+      // Sin red: la sesión local ya quedó cerrada
+    }
+    // Recarga completa: descarta el estado de Google y del portal en memoria.
+    window.location.assign('/app/login');
   }
 
   function saveProfile(event: FormEvent) {
