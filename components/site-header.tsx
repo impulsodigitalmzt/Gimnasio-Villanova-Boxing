@@ -69,7 +69,7 @@ export function SiteHeader({ cartSlot }: { cartSlot?: ReactNode }) {
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-50 border-b-[3px] border-brand/25 bg-black/85 backdrop-blur-xl">
+      <header className="site-header-safe fixed inset-x-0 top-0 z-50 border-b-[3px] border-brand/25 bg-black/85 backdrop-blur-xl">
         <div className="mx-auto flex h-20 max-w-[1440px] items-center justify-between gap-3 px-5 sm:px-8">
           <BrandLogo className="min-w-0" imgClassName="size-9 sm:size-11" />
 

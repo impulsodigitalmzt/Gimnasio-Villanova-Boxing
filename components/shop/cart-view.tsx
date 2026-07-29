@@ -22,7 +22,7 @@ export function CartView({ origin }: { origin: ShopOrigin }) {
   return (
     <section
       className={
-        inPortal ? 'pb-24' : 'min-h-screen bg-[#050505] pb-28 pt-28 sm:pb-16'
+        inPortal ? 'pb-24' : 'site-content-offset min-h-screen bg-[#050505] pb-28 sm:pb-16'
       }
     >
       <div className={inPortal ? '' : 'mx-auto max-w-[1200px] px-5 sm:px-8'}>

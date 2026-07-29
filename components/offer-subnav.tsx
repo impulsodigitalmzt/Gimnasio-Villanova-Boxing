@@ -37,7 +37,7 @@ export function OfferSubnav() {
   return (
     <nav
       aria-label="Secciones de planes"
-      className="sticky top-20 z-40 border-b-[3px] border-brand/25 bg-black/90 backdrop-blur-xl"
+      className="site-sticky-below-header sticky z-40 border-b-[3px] border-brand/25 bg-black/90 backdrop-blur-xl"
     >
       <div className="mx-auto flex max-w-[1440px] gap-2 overflow-x-auto px-5 py-3 sm:px-8">
         {tabs.map(({ id, label, icon: Icon }) => {

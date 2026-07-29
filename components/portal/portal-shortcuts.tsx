@@ -12,7 +12,7 @@ export function PortalShortcuts() {
   return (
     <nav
       aria-label="Opciones principales"
-      className="sticky top-[3.25rem] z-20 border-b border-white/10 bg-black/95 px-4 py-3 backdrop-blur-xl"
+      className="sticky top-[calc(3.25rem+env(safe-area-inset-top,0px))] z-20 border-b border-white/10 bg-black/95 px-4 py-3 backdrop-blur-xl"
     >
       <div className="mx-auto grid max-w-lg grid-cols-4 gap-1.5 sm:max-w-2xl sm:gap-2 sm:px-2 md:max-w-3xl">
         {shortcuts.map((tab) => {

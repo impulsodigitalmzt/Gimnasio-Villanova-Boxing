@@ -18,7 +18,7 @@ function PortalHeader() {
   const showCart = pathname.startsWith('/app/tienda');
 
   return (
-    <header className="sticky top-0 z-30 border-b border-white/10 bg-black/80 px-4 py-3 backdrop-blur-xl">
+    <header className="sticky top-0 z-30 border-b border-white/10 bg-black/80 px-4 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] backdrop-blur-xl">
       <div className="mx-auto flex max-w-lg items-center justify-between sm:max-w-2xl md:max-w-3xl">
         <Link href="/app" className="flex items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}

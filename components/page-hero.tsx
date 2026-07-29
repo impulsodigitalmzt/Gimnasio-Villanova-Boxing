@@ -25,7 +25,7 @@ export function PageHero({
   primaryLabel = 'Acceso alumnos',
 }: PageHeroProps) {
   return (
-    <section className="relative flex min-h-[62svh] items-end overflow-hidden border-b border-white/10 pt-24 sm:min-h-[70svh] sm:pt-28">
+    <section className="site-page-hero-offset relative flex min-h-[62svh] items-end overflow-hidden border-b border-white/10 sm:min-h-[70svh]">
       {image && (
         <>
           {/* eslint-disable-next-line @next/next/no-img-element */}

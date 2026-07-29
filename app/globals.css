@@ -14,6 +14,10 @@
 }
 
 @layer base {
+  :root {
+    --site-header-height: calc(5rem + env(safe-area-inset-top, 0px));
+  }
+
   html {
     max-width: 100%;
     overflow-x: clip;
@@ -88,6 +92,26 @@
 }
 
 @layer utilities {
+  .site-header-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .site-header-offset {
+    padding-top: var(--site-header-height);
+  }
+
+  .site-page-hero-offset {
+    padding-top: calc(var(--site-header-height) + 1rem);
+  }
+
+  .site-content-offset {
+    padding-top: calc(var(--site-header-height) + 2rem);
+  }
+
+  .site-sticky-below-header {
+    top: var(--site-header-height);
+  }
+
   .text-gradient-brand {
     background-image: linear-gradient(100deg, #f5e6b8 0%, #d4af37 42%, #8a7020 100%);
     -webkit-background-clip: text;

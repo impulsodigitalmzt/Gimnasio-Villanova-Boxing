@@ -47,7 +47,7 @@ const experiences = [
 export default function HomePage() {
   return (
     <>
-      <section className="relative flex min-h-[100svh] flex-col bg-black pt-20">
+      <section className="site-header-offset relative flex min-h-[100svh] flex-col bg-black">
         {/* Contenedor con altura real para que el video absolute se pinte */}
         <div className="relative h-[42svh] min-h-[15rem] w-full shrink-0 sm:h-[52svh] lg:h-[62svh]">
           <HeroVideoWall />
