@@ -1,0 +1,42 @@
+/* Villanova CRM — identidad propia del gimnasio (no afecta la landing) */
+.admin-app {
+  --admin-ink: #0a0a0a;
+  --admin-panel: #111113;
+  --admin-panel-2: #18181b;
+  --admin-hover: #222226;
+  --admin-active: rgba(201, 54, 232, 0.18);
+  --admin-brand: #d4af37;
+  --admin-brand-dark: #7c4da4;
+  --admin-brand-light: #f0abfc;
+  --admin-bg: #f6f4f8;
+  --admin-card: #ffffff;
+  --admin-text: #18181b;
+  --admin-muted: #71717a;
+  --admin-border: #e4e4e7;
+  --admin-success: #16a34a;
+  --admin-warn: #d97706;
+  --admin-danger: #e11d48;
+
+  min-height: 100vh;
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+.admin-app * {
+  box-sizing: border-box;
+}
+
+.admin-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.admin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-scrollbar::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+  border-radius: 4px;
+}

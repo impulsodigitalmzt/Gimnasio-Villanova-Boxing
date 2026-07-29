@@ -1,0 +1,24 @@
+/* Portal del Socio — dark fitness, mobile-first (aislado de landing/admin) */
+.portal-app {
+  --portal-bg: #050505;
+  --portal-card: #121214;
+  --portal-card-2: #1a1a1e;
+  --portal-border: rgba(113, 113, 122, 1); /* zinc-500 — perfil grueso visible */
+  --portal-brand: #d4af37;
+  --portal-brand-dark: #7c4da4;
+  --portal-brand-light: #f0abfc;
+  --portal-text: #fafafa;
+  --portal-muted: #a1a1aa;
+  --portal-success: #22c55e;
+  --portal-danger: #f43f5e;
+  --portal-warn: #f59e0b;
+
+  min-height: 100dvh;
+  background: var(--portal-bg);
+  color: var(--portal-text);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+.portal-safe-bottom {
+  padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+}

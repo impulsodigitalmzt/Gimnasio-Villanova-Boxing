@@ -1,0 +1,6 @@
+{
+  "name": "Villanova Boxing",
+  "description": "Sitio web oficial de Gimnasio Villanova Boxing. Boxeo para niños, jóvenes y adultos: membresías Individual, Dúo y Comunidad, retos, rutinas y tienda oficial.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

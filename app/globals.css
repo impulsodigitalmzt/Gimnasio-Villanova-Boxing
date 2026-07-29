@@ -1,0 +1,112 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --font-sans: var(--font-sans), sans-serif;
+  --font-display: var(--font-display), sans-serif;
+  --font-mono: var(--font-mono), monospace;
+
+  --color-brand: #D4AF37;
+  --color-brand-dark: #A8892D;
+  --color-brand-light: #F0D78C;
+  --color-ink: #000000;
+  --color-surface: #111111;
+}
+
+@layer base {
+  html {
+    max-width: 100%;
+    overflow-x: clip;
+    overscroll-behavior-x: none;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: #000000;
+    color: #f4f4f5;
+    font-family: var(--font-sans), sans-serif;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  video {
+    max-width: 100%;
+  }
+
+  @media (max-width: 767px) {
+    input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):not([type='button']):not([type='submit']):not([type='reset']),
+    select,
+    textarea {
+      min-width: 0;
+      max-width: 100%;
+      font-size: 16px !important;
+      line-height: 1.5;
+      touch-action: manipulation;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+  }
+}
+
+@layer utilities {
+  .text-gradient-brand {
+    background-image: linear-gradient(100deg, #f5e6b8 0%, #d4af37 42%, #8a7020 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .gold-border {
+    border-color: color-mix(in srgb, #d4af37 55%, transparent);
+  }
+
+  .gold-glow {
+    box-shadow: 0 0 40px rgba(212, 175, 55, 0.18);
+  }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 110s linear infinite;
+  will-change: transform;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #09090b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a2416;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d4af37;
+}
