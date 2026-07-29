@@ -56,13 +56,13 @@ export function AdminSidebar({ onNavigate }: { onNavigate?: () => void }) {
             <p className="font-display text-sm font-black uppercase tracking-wide">
               Villanova <span className="text-[var(--admin-brand)]">Admin</span>
             </p>
-            <p className="text-[11px] text-zinc-500">Administración</p>
+            <p className="text-xs text-white/75">Administración</p>
           </div>
         </Link>
       </div>
 
       <nav className="admin-scrollbar flex-1 space-y-1 overflow-y-auto px-3 py-5">
-        <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-600">
+        <p className="mb-3 px-3 text-xs font-bold uppercase tracking-[0.2em] text-white/70">
           Menú
         </p>
         <div onClick={onNavigate}>
@@ -76,21 +76,21 @@ export function AdminSidebar({ onNavigate }: { onNavigate?: () => void }) {
                 className={`group mb-1 flex items-center gap-3 rounded-xl px-3 py-3 transition ${
                   active
                     ? 'bg-[var(--admin-active)] text-white shadow-[inset_3px_0_0_var(--admin-brand)]'
-                    : 'text-zinc-400 hover:bg-[var(--admin-hover)] hover:text-white'
+                    : 'text-white hover:bg-[var(--admin-hover)]'
                 }`}
               >
                 <span
                   className={`flex size-9 items-center justify-center rounded-lg ${
                     active
                       ? 'bg-[var(--admin-brand)] text-white'
-                      : 'bg-white/5 text-zinc-400 group-hover:text-white'
+                      : 'bg-white/10 text-white'
                   }`}
                 >
-                  <Icon className="size-4" />
+                  <Icon className="size-[18px]" />
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-sm font-semibold">{item.label}</span>
-                  <span className="block text-[11px] text-zinc-500">{item.hint}</span>
+                  <span className="block text-base font-semibold">{item.label}</span>
+                  <span className="block text-xs leading-snug text-white/75">{item.hint}</span>
                 </span>
               </Link>
             );
@@ -100,14 +100,14 @@ export function AdminSidebar({ onNavigate }: { onNavigate?: () => void }) {
         <button
           type="button"
           onClick={openHelpPanel}
-          className="group mt-2 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-zinc-400 transition hover:bg-[var(--admin-hover)] hover:text-white"
+          className="group mt-2 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-white transition hover:bg-[var(--admin-hover)]"
         >
-          <span className="flex size-9 items-center justify-center rounded-lg bg-white/5 text-zinc-400 group-hover:bg-[var(--admin-brand)]/20 group-hover:text-[var(--admin-brand-light)]">
-            <CircleHelp className="size-4" />
+          <span className="flex size-9 items-center justify-center rounded-lg bg-white/10 text-white group-hover:bg-[var(--admin-brand)]/20">
+            <CircleHelp className="size-[18px]" />
           </span>
           <span className="min-w-0">
-            <span className="block text-sm font-semibold">Ayuda</span>
-            <span className="block text-[11px] text-zinc-500">Guías y FAQ</span>
+            <span className="block text-base font-semibold">Ayuda</span>
+            <span className="block text-xs text-white/75">Guías y FAQ</span>
           </span>
         </button>
       </nav>
@@ -118,20 +118,20 @@ export function AdminSidebar({ onNavigate }: { onNavigate?: () => void }) {
             {adminUser.initials}
           </span>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold">{adminUser.name}</p>
-            <p className="truncate text-[11px] text-zinc-500">{gymHours.compact}</p>
+            <p className="truncate text-base font-semibold text-white">{adminUser.name}</p>
+            <p className="truncate text-xs text-white/75">{gymHours.compact}</p>
           </div>
         </div>
         <Link
           href="/"
-          className="mb-1 block rounded-lg px-3 py-2 text-xs font-semibold text-zinc-400 hover:bg-[var(--admin-hover)] hover:text-white"
+          className="mb-1 block rounded-lg px-3 py-2 text-sm font-semibold text-white hover:bg-[var(--admin-hover)]"
         >
           Ver sitio web
         </Link>
         <button
           type="button"
           onClick={logout}
-          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-zinc-400 hover:bg-[var(--admin-hover)] hover:text-white"
+          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-white hover:bg-[var(--admin-hover)]"
         >
           <LogOut className="size-3.5" />
           Cerrar sesión
