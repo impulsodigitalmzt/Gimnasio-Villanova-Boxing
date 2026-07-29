@@ -91,40 +91,27 @@ export const eventPosters = [
   },
 ] as const;
 
+/** Selección corta: solo los clips con más energía de ring y ambiente. */
 export const eventVideos = [
   {
     src: eventVideo(
       'AQM8CjVSNc5eDGFZGHnwzDFWZY5DJgsMn6PIvF9H2Fz2SPwdgLNz4oTrF-86xlVIPEs-CwZJYECXUqM0-Xirn7p0io_gAKT5ZyCzhyo.mp4',
     ),
     title: 'Pupilos en la arena',
-    copy: 'Función indoor: nuestros alumnos suben al ring con público real y ambiente de competencia.',
-  },
-  {
-    src: eventVideo(
-      'AQN9Ah9mLrNi8lv18U5DfIOaiKjvaz48mzeOdB0Nyj33cQWxHBVBxR-GaY7l_OUcV499jYjcBSyg-EtlZPBtZsOY5gwfyPt8rR9_sqWiPA.mp4',
-    ),
-    title: 'Escenario frente al mar',
-    copy: 'Así se arma Ocean Fight Night en la playa: locación, ring y atmósfera mazatleca.',
-  },
-  {
-    src: eventVideo(
-      'AQNyM6Ns9xkKX0JkUcyE5z0e4NFEhk2xZoaT1S8dKp2Z4EnR5zfQxFa_Yqib4mm-rNqC0fNnJz8CQk6_EVv195yfFvzAyFhANZH5Y48.mp4',
-    ),
-    title: 'Noche amateur al aire libre',
-    copy: 'Boxeo amateur en espacios abiertos de Mazatlán: experiencia formativa, no solo un show.',
+    copy: 'Función indoor: alumnos en ring, público real y atmósfera de competencia.',
   },
   {
     src: eventVideo(
       'AQOVvkewSX5KahkbqJHvo1eJ7zw75S-2k0XxU9LJyqyeI16YM707shPrDETLHzptehfXo2iZanjNgBgoUB_GCG-I6t6Y-vFk4CHjEcxLGg.mp4',
     ),
     title: 'Acción bajo las luces',
-    copy: 'Rounds reales de nuestros pupilos: técnica, coraje y el trabajo de la esquina Villanova.',
+    copy: 'Rounds reales: técnica, coraje y la esquina Villanova en cada pelea.',
   },
   {
     src: eventVideo(
-      'AQPYsH9BDO-M2yCLAq25yY3V2xSH3tw64obtvgnimunGH4gYy7eltumpt7u4xoWeanZu8QnuWz9pse5A8tgcYFrD0KTGyafhRJB7dXU.mp4',
+      'AQN9Ah9mLrNi8lv18U5DfIOaiKjvaz48mzeOdB0Nyj33cQWxHBVBxR-GaY7l_OUcV499jYjcBSyg-EtlZPBtZsOY5gwfyPt8rR9_sqWiPA.mp4',
     ),
-    title: 'La comunidad presente',
-    copy: 'Familias y aficionados acompañando a los alumnos: así se vive el apoyo alrededor del ring.',
+    title: 'Ring frente al mar',
+    copy: 'Ocean Fight Night en la playa: locación, luces y adrenalina mazatleca.',
   },
 ] as const;

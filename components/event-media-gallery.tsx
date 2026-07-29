@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Camera, Film, Images, Play, X } from 'lucide-react';
+import { Camera, Film, Images, X } from 'lucide-react';
 import { eventMoments, eventPosters, eventVideos } from '@/lib/events-data';
 
 type GalleryTab = 'momentos' | 'videos' | 'cartelera';
@@ -86,25 +86,22 @@ export function EventMediaGallery() {
       ) : null}
 
       {active === 'videos' ? (
-        <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {eventVideos.map((item, index) => (
+        <div className="mt-10 grid gap-5 sm:grid-cols-3">
+          {eventVideos.map((item) => (
             <article
               key={item.src}
-              className={`overflow-hidden rounded-3xl border-[3px] border-brand/35 bg-[#111111] ${
-                index === 0 ? 'md:col-span-2 xl:col-span-1' : ''
-              }`}
+              className="overflow-hidden rounded-3xl border-[3px] border-brand/35 bg-[#111111]"
             >
               <div className="relative aspect-[9/16] bg-black">
                 <video
                   src={item.src}
-                  controls
+                  autoPlay
+                  muted
+                  loop
                   playsInline
-                  preload="metadata"
+                  preload="auto"
                   className="absolute inset-0 size-full object-cover"
                 />
-                <span className="pointer-events-none absolute left-4 top-4 flex size-10 items-center justify-center rounded-full bg-brand text-black shadow-lg">
-                  <Play className="size-4 fill-current" />
-                </span>
               </div>
               <div className="p-5">
                 <h3 className="font-display text-xl font-semibold uppercase text-white">{item.title}</h3>

@@ -60,10 +60,10 @@ export default function EventosPage() {
           <SectionHeading
             eyebrow="Videos de eventos especiales"
             title={'LO QUE HACEMOS\n*CON NUESTROS PUPILOS.*'}
-            description="Arena indoor, ring frente al mar, noches amateur y el público que acompaña. Cinco videos reales de Ocean Fight Night y funciones especiales Villanova."
+            description="Arena indoor, acción bajo las luces y ring frente al mar. Tres clips reales de lo que Villanova hace con sus pupilos."
           />
 
-          <div className="mt-12 flex snap-x gap-4 overflow-x-auto pb-4 sm:grid sm:snap-none sm:grid-cols-2 sm:gap-5 sm:overflow-visible lg:grid-cols-5">
+          <div className="mt-12 flex snap-x gap-4 overflow-x-auto pb-4 sm:grid sm:snap-none sm:grid-cols-3 sm:gap-5 sm:overflow-visible">
             {eventVideos.map((item) => (
               <article
                 key={item.src}
@@ -72,9 +72,11 @@ export default function EventosPage() {
                 <div className="relative aspect-[9/16] bg-black">
                   <video
                     src={item.src}
-                    controls
+                    autoPlay
+                    muted
+                    loop
                     playsInline
-                    preload="metadata"
+                    preload="auto"
                     className="absolute inset-0 size-full object-cover"
                   />
                 </div>
