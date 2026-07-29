@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Check, Loader2, Sparkles } from 'lucide-react';
@@ -9,6 +9,7 @@ import { membershipRenewalPrice } from '@/lib/portal/mock-data';
 import {
   getSubscriptionCheckoutAmount,
   getSubscriptionPlan,
+  subscriptionPlans,
 } from '@/lib/portal/subscription-plans';
 import {
   ACTIVATION_POLICY,
@@ -27,7 +28,7 @@ function PayContent() {
   const reto = params.get('reto');
   const concepto = params.get('concepto');
   const titulo = params.get('titulo');
-  const planId = params.get('planId') || undefined;
+  const planIdParam = params.get('planId') || undefined;
   const montoParam = Number(params.get('monto') || 0);
 
   const { joinChallenge, challenges, profile, persistProfile } = useMemberPortal();
@@ -43,10 +44,23 @@ function PayContent() {
   const isShop = concepto === 'tienda';
   const isSubscription =
     !isShop &&
-    (Boolean(planId) || concepto === 'suscripcion' || concepto === 'membresia');
+    !isChallenge &&
+    (Boolean(planIdParam) || concepto === 'suscripcion' || concepto === 'membresia');
 
-  const checkout = planId ? getSubscriptionCheckoutAmount(planId) : null;
-  const plan = planId ? getSubscriptionPlan(planId) : null;
+  const initialPlanId =
+    planIdParam ||
+    (profile?.planId && subscriptionPlans.some((p) => p.id === profile.planId)
+      ? profile.planId
+      : subscriptionPlans[0]?.id) ||
+    'individual';
+
+  const [selectedPlanId, setSelectedPlanId] = useState(initialPlanId);
+
+  const checkout = useMemo(
+    () => (isSubscription ? getSubscriptionCheckoutAmount(selectedPlanId) : null),
+    [isSubscription, selectedPlanId],
+  );
+  const plan = isSubscription ? getSubscriptionPlan(selectedPlanId) : null;
 
   const amount = isChallenge
     ? challenge?.price ?? montoParam
@@ -58,12 +72,12 @@ function PayContent() {
     ? challenge?.title ?? titulo ?? 'Reto Villanova'
     : isShop
       ? titulo || 'Pedido Tienda Villanova'
-      : plan?.name || titulo || profile?.planName || 'Pase Libre';
+      : plan?.name || titulo || profile?.planName || 'Membresía Villanova';
 
   function syncAndActivateMembership() {
     const userId = getCurrentUserId();
     if (!userId && isSubscription) {
-      router.replace(`/app/registro${planId ? `?plan=${planId}` : ''}`);
+      router.replace(`/app/registro?plan=${encodeURIComponent(selectedPlanId)}`);
       return null;
     }
 
@@ -71,11 +85,11 @@ function PayContent() {
       const activated =
         completeSimulatedPayment({
           userId,
-          planId: planId || profile?.planId,
+          planId: selectedPlanId,
           amount,
         }) ||
         activateUserAfterPayment(userId, {
-          planId: planId || profile?.planId,
+          planId: selectedPlanId,
           amountPaid: amount,
         });
 
@@ -86,10 +100,9 @@ function PayContent() {
       }
     }
 
-    // Renovación de socio ya logueado sin planId en query
     if (userId) {
       const activated = activateUserAfterPayment(userId, {
-        planId: profile?.planId,
+        planId: selectedPlanId || profile?.planId,
         amountPaid: amount,
       });
       if (activated) {
@@ -189,7 +202,7 @@ function PayContent() {
             ? 'Tu reto ya está activo.'
             : pendingReview
               ? 'Tu registro quedó pendiente de activación por recepción.'
-              : 'Tu membresía quedó activa por 30 días. Te enviamos la bienvenida por WhatsApp y correo, y programamos el aviso de renovación.'}
+              : `Tu plan ${plan?.name || title} quedó activo por 30 días. Te enviamos la bienvenida por WhatsApp y correo.`}
         </p>
         {redirecting ? (
           <p className="mt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--portal-brand-light)]">
@@ -222,49 +235,114 @@ function PayContent() {
                 ? 'Activar membresía'
                 : 'Pagar ahora'}
         </h1>
-      </header>
-
-      <div className="rounded-[1.75rem] border-[3px] border-zinc-500 bg-[var(--portal-card)] p-6">
-        <p className="text-sm text-zinc-400">Concepto</p>
-        <p className="mt-1 font-display text-2xl font-black uppercase text-white">{title}</p>
-        {planId ? (
-          <p className="mt-1 text-xs text-zinc-500">
-            Plan ID: <span className="font-mono text-zinc-300">{planId}</span>
+        {isSubscription ? (
+          <p className="mt-2 text-sm text-zinc-400">
+            Elige el plan que mejor te convenga y confirma el pago.
           </p>
         ) : null}
+      </header>
 
-        {isShop && cartItems.length > 0 ? (
-          <ul className="mt-4 space-y-2 border-t border-white/10 pt-4 text-sm text-zinc-400">
-            {cartItems.map((item) => (
-              <li key={item.productId} className="flex justify-between gap-3">
-                <span className="truncate text-zinc-300">
-                  {item.qty}× {item.name}
-                </span>
-                <span className="shrink-0 text-white">
-                  ${(item.price * item.qty).toLocaleString('es-MX')}
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : null}
+      {isSubscription ? (
+        <div className="space-y-3" role="radiogroup" aria-label="Planes de membresía">
+          {subscriptionPlans.map((option) => {
+            const selected = option.id === selectedPlanId;
+            const optionCheckout = getSubscriptionCheckoutAmount(option.id);
+            return (
+              <button
+                key={option.id}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                onClick={() => setSelectedPlanId(option.id)}
+                className={`w-full rounded-[1.75rem] border-[3px] p-5 text-left transition ${
+                  selected
+                    ? 'border-[var(--portal-brand)] bg-[var(--portal-brand)]/10'
+                    : 'border-zinc-500 bg-[var(--portal-card)] hover:border-zinc-400'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-display text-xl font-black uppercase text-white">
+                        {option.name}
+                      </p>
+                      {option.popular ? (
+                        <span className="rounded-full bg-[var(--portal-brand)] px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-black">
+                          Popular
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className="mt-1 text-sm text-zinc-400">{option.period}</p>
+                    <p className="mt-2 text-sm leading-relaxed text-zinc-300">{option.description}</p>
+                    <ul className="mt-3 space-y-1">
+                      {option.features.map((feature) => (
+                        <li key={feature} className="flex items-start gap-2 text-xs text-zinc-400">
+                          <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--portal-brand)]" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <p className="font-display text-2xl font-black text-[var(--portal-brand-light)]">
+                      ${optionCheckout.total.toLocaleString('es-MX')}
+                    </p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                      MXN
+                    </p>
+                    <span
+                      className={`mt-3 ml-auto flex size-6 items-center justify-center rounded-full border-2 ${
+                        selected
+                          ? 'border-[var(--portal-brand)] bg-[var(--portal-brand)] text-black'
+                          : 'border-zinc-500'
+                      }`}
+                      aria-hidden
+                    >
+                      {selected ? <Check className="size-3.5" strokeWidth={3} /> : null}
+                    </span>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="rounded-[1.75rem] border-[3px] border-zinc-500 bg-[var(--portal-card)] p-6">
+          <p className="text-sm text-zinc-400">Concepto</p>
+          <p className="mt-1 font-display text-2xl font-black uppercase text-white">{title}</p>
 
-        {checkout && checkout.enrollment > 0 ? (
-          <div className="mt-4 space-y-1 border-t border-white/10 pt-4 text-sm text-zinc-400">
-            <div className="flex justify-between">
-              <span>Membresía</span>
-              <span className="text-white">${checkout.planPrice.toLocaleString('es-MX')}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Inscripción</span>
-              <span className="text-white">${checkout.enrollment.toLocaleString('es-MX')}</span>
-            </div>
+          {isShop && cartItems.length > 0 ? (
+            <ul className="mt-4 space-y-2 border-t border-white/10 pt-4 text-sm text-zinc-400">
+              {cartItems.map((item) => (
+                <li key={item.productId} className="flex justify-between gap-3">
+                  <span className="truncate text-zinc-300">
+                    {item.qty}× {item.name}
+                  </span>
+                  <span className="shrink-0 text-white">
+                    ${(item.price * item.qty).toLocaleString('es-MX')}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          <p className="mt-4 font-display text-4xl font-black text-[var(--portal-brand-light)]">
+            ${amount.toLocaleString('es-MX')} <span className="text-sm text-zinc-500">MXN</span>
+          </p>
+        </div>
+      )}
+
+      {isSubscription ? (
+        <div className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3">
+          <div className="flex items-center justify-between gap-3 text-sm">
+            <span className="text-zinc-400">Total a pagar</span>
+            <span className="font-display text-2xl font-black text-[var(--portal-brand-light)]">
+              ${amount.toLocaleString('es-MX')}{' '}
+              <span className="text-sm font-bold text-zinc-500">MXN</span>
+            </span>
           </div>
-        ) : null}
-
-        <p className="mt-4 font-display text-4xl font-black text-[var(--portal-brand-light)]">
-          ${amount.toLocaleString('es-MX')} <span className="text-sm text-zinc-500">MXN</span>
-        </p>
-      </div>
+        </div>
+      ) : null}
 
       <button
         type="button"
@@ -276,9 +354,7 @@ function PayContent() {
         {processing ? 'Procesando pago...' : 'Confirmar pago'}
       </button>
 
-      <p className="text-center text-[11px] text-zinc-500">
-        Pago seguro · Villanova Boxing
-      </p>
+      <p className="text-center text-[11px] text-zinc-500">Pago seguro · Villanova Boxing</p>
 
       <button
         type="button"
