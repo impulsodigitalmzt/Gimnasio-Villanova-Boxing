@@ -41,12 +41,25 @@ export function AutoScrollGallery({
   const [selected, setSelected] = useState<AutoScrollGalleryItem | null>(null);
   const pausedRef = useRef(false);
   const resumeTimerRef = useRef<number | null>(null);
+  /** Evita que el scroll del autoplay dispare la pausa por interacción. */
+  const autoScrollingRef = useRef(false);
+  const userTouchingRef = useRef(false);
   const dragRef = useRef<{
     active: boolean;
+    pointerId: number | null;
     startX: number;
     startScroll: number;
     moved: boolean;
-  }>({ active: false, startX: 0, startScroll: 0, moved: false });
+    /** Solo mouse usa arrastre manual; el dedo usa scroll nativo. */
+    isMouse: boolean;
+  }>({
+    active: false,
+    pointerId: null,
+    startX: 0,
+    startScroll: 0,
+    moved: false,
+    isMouse: false,
+  });
 
   const loopImages = [...items, ...items];
 
@@ -94,9 +107,16 @@ export function AutoScrollGallery({
 
     let frame = 0;
     const tick = () => {
-      if (!pausedRef.current && !selected && !dragRef.current.active) {
+      if (
+        !pausedRef.current &&
+        !selected &&
+        !dragRef.current.active &&
+        !userTouchingRef.current
+      ) {
+        autoScrollingRef.current = true;
         track.scrollLeft += AUTO_SPEED;
         normalizeLoop(track);
+        autoScrollingRef.current = false;
       }
       frame = window.requestAnimationFrame(tick);
     };
@@ -107,6 +127,45 @@ export function AutoScrollGallery({
       if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
     };
   }, [items.length, selected]);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || items.length === 0) return;
+
+    const onScroll = () => {
+      if (autoScrollingRef.current) return;
+      // Scroll nativo (dedo / trackpad / flechas): mantiene el bucle.
+      normalizeLoop(track);
+      if (userTouchingRef.current || dragRef.current.active) {
+        pauseAuto();
+      } else {
+        pauseAuto();
+        resumeAutoSoon();
+      }
+    };
+
+    const onTouchStart = () => {
+      userTouchingRef.current = true;
+      pauseAuto();
+    };
+
+    const onTouchEnd = () => {
+      userTouchingRef.current = false;
+      resumeAutoSoon();
+    };
+
+    track.addEventListener('scroll', onScroll, { passive: true });
+    track.addEventListener('touchstart', onTouchStart, { passive: true });
+    track.addEventListener('touchend', onTouchEnd, { passive: true });
+    track.addEventListener('touchcancel', onTouchEnd, { passive: true });
+
+    return () => {
+      track.removeEventListener('scroll', onScroll);
+      track.removeEventListener('touchstart', onTouchStart);
+      track.removeEventListener('touchend', onTouchEnd);
+      track.removeEventListener('touchcancel', onTouchEnd);
+    };
+  }, [items.length]);
 
   useEffect(() => {
     if (!selected) return;
@@ -132,11 +191,28 @@ export function AutoScrollGallery({
     if (event.pointerType === 'mouse' && event.button !== 0) return;
 
     pauseAuto();
+
+    // En táctil dejamos el scroll horizontal nativo (touch-pan-x).
+    if (event.pointerType !== 'mouse') {
+      userTouchingRef.current = true;
+      dragRef.current = {
+        active: false,
+        pointerId: null,
+        startX: event.clientX,
+        startScroll: track.scrollLeft,
+        moved: false,
+        isMouse: false,
+      };
+      return;
+    }
+
     dragRef.current = {
       active: true,
+      pointerId: event.pointerId,
       startX: event.clientX,
       startScroll: track.scrollLeft,
       moved: false,
+      isMouse: true,
     };
     track.setPointerCapture(event.pointerId);
   };
@@ -144,23 +220,36 @@ export function AutoScrollGallery({
   const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     const track = trackRef.current;
     const drag = dragRef.current;
-    if (!track || !drag.active) return;
+    if (!track || !drag.active || !drag.isMouse) return;
 
     const delta = event.clientX - drag.startX;
     if (Math.abs(delta) > 6) drag.moved = true;
+    autoScrollingRef.current = true;
     track.scrollLeft = drag.startScroll - delta;
     normalizeLoop(track);
+    autoScrollingRef.current = false;
   };
 
   const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
     const track = trackRef.current;
-    if (!track || !dragRef.current.active) return;
-    dragRef.current.active = false;
-    try {
-      track.releasePointerCapture(event.pointerId);
-    } catch {
-      // Ya liberado
+    const drag = dragRef.current;
+
+    if (drag.active && drag.isMouse && track) {
+      drag.active = false;
+      drag.pointerId = null;
+      try {
+        track.releasePointerCapture(event.pointerId);
+      } catch {
+        // Ya liberado
+      }
+    } else if (!drag.isMouse) {
+      // Marca swipe vs tap para no abrir el lightbox al deslizar.
+      if (Math.abs(event.clientX - drag.startX) > 8) {
+        drag.moved = true;
+      }
+      userTouchingRef.current = false;
     }
+
     resumeAutoSoon();
   };
 
@@ -199,7 +288,7 @@ export function AutoScrollGallery({
 
         <div
           ref={trackRef}
-          className="flex cursor-grab gap-4 overflow-x-auto pb-5 active:cursor-grabbing touch-pan-y [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex cursor-grab gap-4 overflow-x-auto overscroll-x-contain pb-5 active:cursor-grabbing touch-pan-x [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={endDrag}
@@ -216,10 +305,13 @@ export function AutoScrollGallery({
               key={`${item.src}-${index}`}
               type="button"
               onClick={() => {
-                if (dragRef.current.moved) return;
+                if (dragRef.current.moved) {
+                  dragRef.current.moved = false;
+                  return;
+                }
                 setSelected(item);
               }}
-              className={`group relative shrink-0 overflow-hidden rounded-3xl border-[3px] border-brand/35 bg-zinc-900 text-left ${cardClassName}`}
+              className={`group relative shrink-0 touch-pan-x overflow-hidden rounded-3xl border-[3px] border-brand/35 bg-zinc-900 text-left ${cardClassName}`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
