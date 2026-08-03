@@ -39,22 +39,20 @@ export function AutoScrollGallery({
 }: AutoScrollGalleryProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [selected, setSelected] = useState<AutoScrollGalleryItem | null>(null);
+  const selectedRef = useRef<AutoScrollGalleryItem | null>(null);
   const pausedRef = useRef(false);
   const resumeTimerRef = useRef<number | null>(null);
-  /** Evita que el scroll del autoplay dispare la pausa por interacción. */
-  const autoScrollingRef = useRef(false);
+  /** Acumula fracciones: en móvil scrollLeft suele ser entero y 0.55px no avanza. */
+  const scrollCarryRef = useRef(0);
   const userTouchingRef = useRef(false);
   const dragRef = useRef<{
     active: boolean;
-    pointerId: number | null;
     startX: number;
     startScroll: number;
     moved: boolean;
-    /** Solo mouse usa arrastre manual; el dedo usa scroll nativo. */
     isMouse: boolean;
   }>({
     active: false,
-    pointerId: null,
     startX: 0,
     startScroll: 0,
     moved: false,
@@ -62,6 +60,8 @@ export function AutoScrollGallery({
   });
 
   const loopImages = [...items, ...items];
+
+  selectedRef.current = selected;
 
   const pauseAuto = () => {
     pausedRef.current = true;
@@ -109,14 +109,17 @@ export function AutoScrollGallery({
     const tick = () => {
       if (
         !pausedRef.current &&
-        !selected &&
+        !selectedRef.current &&
         !dragRef.current.active &&
         !userTouchingRef.current
       ) {
-        autoScrollingRef.current = true;
-        track.scrollLeft += AUTO_SPEED;
-        normalizeLoop(track);
-        autoScrollingRef.current = false;
+        scrollCarryRef.current += AUTO_SPEED;
+        const step = Math.floor(scrollCarryRef.current);
+        if (step > 0) {
+          scrollCarryRef.current -= step;
+          track.scrollLeft += step;
+          normalizeLoop(track);
+        }
       }
       frame = window.requestAnimationFrame(tick);
     };
@@ -126,21 +129,17 @@ export function AutoScrollGallery({
       window.cancelAnimationFrame(frame);
       if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
     };
-  }, [items.length, selected]);
+  }, [items.length]);
 
   useEffect(() => {
     const track = trackRef.current;
     if (!track || items.length === 0) return;
 
+    // Solo mantiene el bucle infinito; no pausa el autoplay (en móvil el
+    // evento scroll llega tarde y dejaba la pasarela congelada).
     const onScroll = () => {
-      if (autoScrollingRef.current) return;
-      // Scroll nativo (dedo / trackpad / flechas): mantiene el bucle.
-      normalizeLoop(track);
-      if (userTouchingRef.current || dragRef.current.active) {
-        pauseAuto();
-      } else {
-        pauseAuto();
-        resumeAutoSoon();
+      if (dragRef.current.active || userTouchingRef.current) {
+        normalizeLoop(track);
       }
     };
 
@@ -151,6 +150,7 @@ export function AutoScrollGallery({
 
     const onTouchEnd = () => {
       userTouchingRef.current = false;
+      normalizeLoop(track);
       resumeAutoSoon();
     };
 
@@ -197,7 +197,6 @@ export function AutoScrollGallery({
       userTouchingRef.current = true;
       dragRef.current = {
         active: false,
-        pointerId: null,
         startX: event.clientX,
         startScroll: track.scrollLeft,
         moved: false,
@@ -208,7 +207,6 @@ export function AutoScrollGallery({
 
     dragRef.current = {
       active: true,
-      pointerId: event.pointerId,
       startX: event.clientX,
       startScroll: track.scrollLeft,
       moved: false,
@@ -224,10 +222,8 @@ export function AutoScrollGallery({
 
     const delta = event.clientX - drag.startX;
     if (Math.abs(delta) > 6) drag.moved = true;
-    autoScrollingRef.current = true;
     track.scrollLeft = drag.startScroll - delta;
     normalizeLoop(track);
-    autoScrollingRef.current = false;
   };
 
   const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -236,14 +232,13 @@ export function AutoScrollGallery({
 
     if (drag.active && drag.isMouse && track) {
       drag.active = false;
-      drag.pointerId = null;
       try {
         track.releasePointerCapture(event.pointerId);
       } catch {
         // Ya liberado
       }
+      normalizeLoop(track);
     } else if (!drag.isMouse) {
-      // Marca swipe vs tap para no abrir el lightbox al deslizar.
       if (Math.abs(event.clientX - drag.startX) > 8) {
         drag.moved = true;
       }
