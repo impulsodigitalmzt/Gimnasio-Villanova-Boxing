@@ -22,10 +22,11 @@ type AutoScrollGalleryProps = {
 
 const AUTO_SPEED = 0.55;
 const RESUME_DELAY_MS = 2200;
+const DRAG_CLICK_THRESHOLD = 8;
 
 /**
- * Pasarela horizontal en bucle: avanza sola y se puede arrastrar
- * con mouse/dedo, flechas y abrir cada imagen.
+ * Pasarela horizontal en bucle (transform, no scrollLeft).
+ * En móvil: autoplay + swipe con el dedo + tap para ampliar.
  */
 export function AutoScrollGallery({
   items,
@@ -37,30 +38,30 @@ export function AutoScrollGallery({
   badge,
   caption = 'Ver imagen',
 }: AutoScrollGalleryProps) {
+  const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [selected, setSelected] = useState<AutoScrollGalleryItem | null>(null);
-  const selectedRef = useRef<AutoScrollGalleryItem | null>(null);
+
+  const offsetRef = useRef(0);
+  const loopWidthRef = useRef(0);
   const pausedRef = useRef(false);
+  const selectedRef = useRef<AutoScrollGalleryItem | null>(null);
   const resumeTimerRef = useRef<number | null>(null);
-  /** Acumula fracciones: en móvil scrollLeft suele ser entero y 0.55px no avanza. */
-  const scrollCarryRef = useRef(0);
-  const userTouchingRef = useRef(false);
   const dragRef = useRef<{
     active: boolean;
+    pointerId: number | null;
     startX: number;
-    startScroll: number;
+    startOffset: number;
     moved: boolean;
-    isMouse: boolean;
   }>({
     active: false,
+    pointerId: null,
     startX: 0,
-    startScroll: 0,
+    startOffset: 0,
     moved: false,
-    isMouse: false,
   });
 
   const loopImages = [...items, ...items];
-
   selectedRef.current = selected;
 
   const pauseAuto = () => {
@@ -79,31 +80,64 @@ export function AutoScrollGallery({
     }, RESUME_DELAY_MS);
   };
 
-  const normalizeLoop = (track: HTMLDivElement) => {
-    const half = track.scrollWidth / 2;
-    if (half <= 0) return;
-    if (track.scrollLeft >= half) {
-      track.scrollLeft -= half;
-    } else if (track.scrollLeft <= 0) {
-      track.scrollLeft += half;
-    }
+  const applyTransform = (offset: number) => {
+    const track = trackRef.current;
+    if (!track) return;
+    track.style.transform = `translate3d(${-offset}px, 0, 0)`;
+  };
+
+  const normalizeOffset = (value: number) => {
+    const loopWidth = loopWidthRef.current;
+    if (loopWidth <= 0) return value;
+    let next = value % loopWidth;
+    if (next < 0) next += loopWidth;
+    return next;
+  };
+
+  const measureLoopWidth = () => {
+    const track = trackRef.current;
+    if (!track) return;
+    // Dos copias idénticas → el ancho de una copia es la mitad del track.
+    loopWidthRef.current = track.scrollWidth / 2;
   };
 
   const move = (direction: -1 | 1) => {
-    const track = trackRef.current;
-    if (!track) return;
+    const viewport = viewportRef.current;
+    if (!viewport) return;
     pauseAuto();
-    track.scrollBy({
-      left: direction * Math.min(track.clientWidth * 0.8, 620),
-      behavior: 'smooth',
-    });
-    window.setTimeout(() => normalizeLoop(track), 420);
+    const step = Math.min(viewport.clientWidth * 0.8, 620);
+    offsetRef.current = normalizeOffset(offsetRef.current + direction * step);
+    applyTransform(offsetRef.current);
     resumeAutoSoon();
   };
 
   useEffect(() => {
+    if (items.length === 0) return;
+
+    measureLoopWidth();
     const track = trackRef.current;
-    if (!track || items.length === 0) return;
+    if (!track) return;
+
+    const ro = new ResizeObserver(() => {
+      const prevLoop = loopWidthRef.current;
+      measureLoopWidth();
+      if (prevLoop > 0 && loopWidthRef.current > 0) {
+        offsetRef.current = normalizeOffset(offsetRef.current);
+        applyTransform(offsetRef.current);
+      }
+    });
+    ro.observe(track);
+
+    // Recalcula cuando cargan imágenes (cambia el ancho real).
+    const images = track.querySelectorAll('img');
+    const onImgLoad = () => {
+      measureLoopWidth();
+      offsetRef.current = normalizeOffset(offsetRef.current);
+      applyTransform(offsetRef.current);
+    };
+    images.forEach((img) => {
+      if (!img.complete) img.addEventListener('load', onImgLoad);
+    });
 
     let frame = 0;
     const tick = () => {
@@ -111,15 +145,10 @@ export function AutoScrollGallery({
         !pausedRef.current &&
         !selectedRef.current &&
         !dragRef.current.active &&
-        !userTouchingRef.current
+        loopWidthRef.current > 0
       ) {
-        scrollCarryRef.current += AUTO_SPEED;
-        const step = Math.floor(scrollCarryRef.current);
-        if (step > 0) {
-          scrollCarryRef.current -= step;
-          track.scrollLeft += step;
-          normalizeLoop(track);
-        }
+        offsetRef.current = normalizeOffset(offsetRef.current + AUTO_SPEED);
+        applyTransform(offsetRef.current);
       }
       frame = window.requestAnimationFrame(tick);
     };
@@ -127,43 +156,9 @@ export function AutoScrollGallery({
 
     return () => {
       window.cancelAnimationFrame(frame);
+      ro.disconnect();
+      images.forEach((img) => img.removeEventListener('load', onImgLoad));
       if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
-    };
-  }, [items.length]);
-
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track || items.length === 0) return;
-
-    // Solo mantiene el bucle infinito; no pausa el autoplay (en móvil el
-    // evento scroll llega tarde y dejaba la pasarela congelada).
-    const onScroll = () => {
-      if (dragRef.current.active || userTouchingRef.current) {
-        normalizeLoop(track);
-      }
-    };
-
-    const onTouchStart = () => {
-      userTouchingRef.current = true;
-      pauseAuto();
-    };
-
-    const onTouchEnd = () => {
-      userTouchingRef.current = false;
-      normalizeLoop(track);
-      resumeAutoSoon();
-    };
-
-    track.addEventListener('scroll', onScroll, { passive: true });
-    track.addEventListener('touchstart', onTouchStart, { passive: true });
-    track.addEventListener('touchend', onTouchEnd, { passive: true });
-    track.addEventListener('touchcancel', onTouchEnd, { passive: true });
-
-    return () => {
-      track.removeEventListener('scroll', onScroll);
-      track.removeEventListener('touchstart', onTouchStart);
-      track.removeEventListener('touchend', onTouchEnd);
-      track.removeEventListener('touchcancel', onTouchEnd);
     };
   }, [items.length]);
 
@@ -186,65 +181,52 @@ export function AutoScrollGallery({
   }, [selected]);
 
   const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    const track = trackRef.current;
-    if (!track) return;
+    const viewport = viewportRef.current;
+    if (!viewport) return;
     if (event.pointerType === 'mouse' && event.button !== 0) return;
 
     pauseAuto();
-
-    // En táctil dejamos el scroll horizontal nativo (touch-pan-x).
-    if (event.pointerType !== 'mouse') {
-      userTouchingRef.current = true;
-      dragRef.current = {
-        active: false,
-        startX: event.clientX,
-        startScroll: track.scrollLeft,
-        moved: false,
-        isMouse: false,
-      };
-      return;
-    }
-
+    // Evita que iOS robe el gesto horizontal para scroll de página.
+    viewport.style.touchAction = 'none';
     dragRef.current = {
       active: true,
+      pointerId: event.pointerId,
       startX: event.clientX,
-      startScroll: track.scrollLeft,
+      startOffset: offsetRef.current,
       moved: false,
-      isMouse: true,
     };
-    track.setPointerCapture(event.pointerId);
+    viewport.setPointerCapture(event.pointerId);
   };
 
   const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    const track = trackRef.current;
     const drag = dragRef.current;
-    if (!track || !drag.active || !drag.isMouse) return;
+    if (!drag.active) return;
 
     const delta = event.clientX - drag.startX;
-    if (Math.abs(delta) > 6) drag.moved = true;
-    track.scrollLeft = drag.startScroll - delta;
-    normalizeLoop(track);
+    if (Math.abs(delta) > DRAG_CLICK_THRESHOLD) drag.moved = true;
+    offsetRef.current = normalizeOffset(drag.startOffset - delta);
+    applyTransform(offsetRef.current);
   };
 
-  const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
-    const track = trackRef.current;
+  const endDrag = () => {
+    const viewport = viewportRef.current;
     const drag = dragRef.current;
+    if (!drag.active) return;
 
-    if (drag.active && drag.isMouse && track) {
-      drag.active = false;
-      try {
-        track.releasePointerCapture(event.pointerId);
-      } catch {
-        // Ya liberado
+    drag.active = false;
+    if (viewport) {
+      viewport.style.touchAction = '';
+      if (drag.pointerId != null) {
+        try {
+          viewport.releasePointerCapture(drag.pointerId);
+        } catch {
+          // Ya liberado
+        }
       }
-      normalizeLoop(track);
-    } else if (!drag.isMouse) {
-      if (Math.abs(event.clientX - drag.startX) > 8) {
-        drag.moved = true;
-      }
-      userTouchingRef.current = false;
     }
-
+    drag.pointerId = null;
+    offsetRef.current = normalizeOffset(offsetRef.current);
+    applyTransform(offsetRef.current);
     resumeAutoSoon();
   };
 
@@ -282,50 +264,52 @@ export function AutoScrollGallery({
         ) : null}
 
         <div
-          ref={trackRef}
-          className="flex cursor-grab gap-4 overflow-x-auto overscroll-x-contain pb-5 active:cursor-grabbing touch-pan-x [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
+          ref={viewportRef}
+          className="cursor-grab touch-pan-y overflow-hidden pb-5 active:cursor-grabbing"
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
-          onWheel={() => {
-            pauseAuto();
-            resumeAutoSoon();
-          }}
           role="region"
           aria-label={ariaLabel}
         >
-          {loopImages.map((item, index) => (
-            <button
-              key={`${item.src}-${index}`}
-              type="button"
-              onClick={() => {
-                if (dragRef.current.moved) {
-                  dragRef.current.moved = false;
-                  return;
-                }
-                setSelected(item);
-              }}
-              className={`group relative shrink-0 touch-pan-x overflow-hidden rounded-3xl border-[3px] border-brand/35 bg-zinc-900 text-left ${cardClassName}`}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={item.src}
-                alt={item.alt}
-                loading="lazy"
-                draggable={false}
-                className="pointer-events-none absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-105"
-              />
-              <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              {badge ? (
-                <span className="pointer-events-none absolute bottom-3 left-3">{badge}</span>
-              ) : (
-                <span className="pointer-events-none absolute inset-x-4 bottom-4 text-[10px] font-bold uppercase tracking-wider text-white">
-                  {caption}
-                </span>
-              )}
-            </button>
-          ))}
+          <div
+            ref={trackRef}
+            className="flex w-max gap-4 will-change-transform"
+            style={{ transform: 'translate3d(0, 0, 0)' }}
+          >
+            {loopImages.map((item, index) => (
+              <button
+                key={`${item.src}-${index}`}
+                type="button"
+                onClick={() => {
+                  if (dragRef.current.moved) {
+                    dragRef.current.moved = false;
+                    return;
+                  }
+                  setSelected(item);
+                }}
+                className={`group relative shrink-0 overflow-hidden rounded-3xl border-[3px] border-brand/35 bg-zinc-900 text-left ${cardClassName}`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={item.src}
+                  alt={item.alt}
+                  loading="lazy"
+                  draggable={false}
+                  className="pointer-events-none absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-105"
+                />
+                <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                {badge ? (
+                  <span className="pointer-events-none absolute bottom-3 left-3">{badge}</span>
+                ) : (
+                  <span className="pointer-events-none absolute inset-x-4 bottom-4 text-[10px] font-bold uppercase tracking-wider text-white">
+                    {caption}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
